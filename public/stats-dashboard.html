@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stats Dashboard - SC2 Stream Overlays</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
+</head>
+<body>
+  <div class="overlay-container">
+    <div class="overlay-panel">
+      <div class="panel-header">
+        <h1 id="panel-title">SC2 Battle Stats</h1>
+        <div class="status-indicator">
+          <span id="status-icon" class="offline"><i class="fas fa-circle"></i></span>
+          <span id="status-text">Offline</span>
+        </div>
+      </div>
+      
+      <div class="stats-container">
+        <div class="stats-section">
+          <h2>Estatísticas Gerais</h2>
+          <div class="stat-row">
+            <div class="stat-item">
+              <div class="stat-value" id="total-games">0</div>
+              <div class="stat-label">Partidas</div>
+            </div>
+            <div class="stat-item victory">
+              <div class="stat-value" id="total-wins">0</div>
+              <div class="stat-label">Vitórias</div>
+            </div>
+            <div class="stat-item defeat">
+              <div class="stat-value" id="total-losses">0</div>
+              <div class="stat-label">Derrotas</div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-item">
+              <div class="stat-value" id="win-percentage">0%</div>
+              <div class="stat-label">Taxa de Vitória</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stats-section">
+          <h2>Por Raça do Oponente</h2>
+          <div class="race-stats">
+            <div class="race-stat" id="zerg-stats">
+              <div class="race-icon zerg">
+                <i class="fas fa-bug"></i>
+              </div>
+              <div class="race-data">
+                <div class="race-name">Zerg</div>
+                <div class="race-record">
+                  <span id="zerg-wins">0</span>-<span id="zerg-losses">0</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="race-stat" id="terran-stats">
+              <div class="race-icon terran">
+                <i class="fas fa-rocket"></i>
+              </div>
+              <div class="race-data">
+                <div class="race-name">Terran</div>
+                <div class="race-record">
+                  <span id="terran-wins">0</span>-<span id="terran-losses">0</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="race-stat" id="protoss-stats">
+              <div class="race-icon protoss">
+                <i class="fas fa-atom"></i>
+              </div>
+              <div class="race-data">
+                <div class="race-name">Protoss</div>
+                <div class="race-record">
+                  <span id="protoss-wins">0</span>-<span id="protoss-losses">0</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="race-stat" id="random-stats">
+              <div class="race-icon random">
+                <i class="fas fa-dice"></i>
+              </div>
+              <div class="race-data">
+                <div class="race-name">Random</div>
+                <div class="race-record">
+                  <span id="random-wins">0</span>-<span id="random-losses">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stats-section">
+          <h2>Último Jogo</h2>
+          <div class="last-game" id="last-game-container">
+            <div class="no-game">Nenhuma partida registrada</div>
+            <div class="game-info hidden">
+              <div class="opponent-info">
+                <span class="label">Oponente:</span>
+                <span id="last-opponent-name">-</span>
+              </div>
+              <div class="opponent-race">
+                <span class="label">Raça:</span>
+                <span id="last-opponent-race">-</span>
+                <span id="last-opponent-race-icon"></span>
+              </div>
+              <div class="game-result">
+                <span class="label">Resultado:</span>
+                <span id="last-game-result">-</span>
+              </div>
+              <div class="game-time">
+                <span class="label">Quando:</span>
+                <span id="last-game-time">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel-footer">
+        <div id="current-status">Aguardando conexão com StarCraft II...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/stats-dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SC2 Stream Overlays</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: #00a8ff;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .overlay-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    
+    .overlay-link {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background-color: #1e1e1e;
+      border-radius: 5px;
+      text-decoration: none;
+      color: #e0e0e0;
+      border-left: 4px solid #00a8ff;
+      transition: all 0.2s ease;
+    }
+    
+    .overlay-link:hover {
+      background-color: #252525;
+      transform: translateX(5px);
+    }
+    
+    .overlay-link i {
+      margin-right: 10px;
+      color: #00a8ff;
+    }
+    
+    .overlay-description {
+      margin-top: 5px;
+      font-size: 0.9em;
+      opacity: 0.7;
+    }
+    
+    .status {
+      background-color: #1e1e1e;
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    
+    .status h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #00a8ff;
+    }
+    
+    .server-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .info-label {
+      opacity: 0.7;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>SC2 Stream Overlays</h1>
+    
+    <div class="overlay-links">
+      <a href="/stats-dashboard" class="overlay-link" target="_blank">
+        <i class="fas fa-chart-bar"></i>
+        <div>
+          <strong>Stats Dashboard</strong>
+          <div class="overlay-description">Painel vertical com estatísticas detalhadas de jogos</div>
+        </div>
+      </a>
+      
+      <a href="/match-bar" class="overlay-link" target="_blank">
+        <i class="fas fa-gamepad"></i>
+        <div>
+          <strong>Match Bar</strong>
+          <div class="overlay-description">Barra compacta para exibir durante partidas</div>
+        </div>
+      </a>
+    </div>
+    
+    <div class="status">
+      <h2>Status do Servidor</h2>
+      <div class="server-info">
+        <div class="info-item">
+          <span class="info-label">Status:</span>
+          <span id="server-status">Aguardando...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Conexão com SC2:</span>
+          <span id="sc2-status">Aguardando...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Porta do servidor:</span>
+          <span id="server-port">3000</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Código simples para verificar o status
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Verificar status do servidor
+        document.getElementById('server-status').textContent = 'Online';
+        
+        // Verificar status da conexão SC2
+        const response = await fetch('/api/status');
+        const data = await response.json();
+        
+        document.getElementById('sc2-status').textContent = data.connected ? 'Conectado' : 'Desconectado';
+        document.getElementById('server-port').textContent = data.port || '3000';
+      } catch (error) {
+        console.error('Erro ao verificar status:', error);
+      }
+    });
+  </script>
+</body>
+</html>

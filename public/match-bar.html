@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Match Bar - SC2 Stream Overlays</title>
+  <link rel="stylesheet" href="/css/match-bar.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
+</head>
+<body>
+  <div class="match-bar-container">
+    <div class="match-bar">
+      <!-- Replay Badge -->
+      <div class="replay-badge hidden" id="replay-badge">
+        <i class="fas fa-sync-alt"></i> REPLAY
+      </div>
+      
+      <!-- Player 1 (Streamer) -->
+      <div class="player player-left">
+        <div class="player-race" id="player1-race">
+          <i class="fas fa-question"></i>
+        </div>
+        <div class="player-name" id="player1-name">Aguardando...</div>
+      </div>
+      
+      <!-- VS -->
+      <div class="vs">VS</div>
+      
+      <!-- Player 2 (Opponent) -->
+      <div class="player player-right">
+        <div class="player-name" id="player2-name">Aguardando...</div>
+        <div class="player-race" id="player2-race">
+          <i class="fas fa-question"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/match-bar.js"></script>
+</body>
+</html>

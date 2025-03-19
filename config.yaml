@@ -1,0 +1,29 @@
+# Configuração do SC2 Stream Overlay
+
+# Informações do jogador
+player:
+  id: 1
+  name: "firebat"  # Seu nome de jogador no StarCraft II
+  exact_match: false  # Se falso, fará correspondência parcial/case-insensitive
+
+# Configurações do cliente SC2
+sc2_client:
+  api_url: "http://host.docker.internal:6119"  # URL padrão da API do cliente SC2
+  poll_interval: 2000  # Intervalo de polling em ms (2 segundos)
+  retry_interval: 5000  # Intervalo para novas tentativas após erro
+
+# Configurações do servidor web
+server:
+  port: 3000
+  host: "localhost"
+
+# Configurações do overlay
+overlay:
+  title: "SC2 Battle Stats"  # Título do painel de estatísticas
+  theme: "dark"  # Tema do painel (dark ou light)
+  auto_save: true  # Salvar estatísticas automaticamente
+  save_interval: 300000  # Intervalo para salvar estatísticas (5 minutos)
+
+# Configurações de armazenamento
+storage:
+  stats_file: "./data/stats.json"  # Arquivo para salvar estatísticas

@@ -1,0 +1,27 @@
+services:
+  node-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sc2overylay-app
+    ports:
+      # Mapear porta 3000 do container para porta 3000 do host
+      - "3000:3000"
+    volumes:
+      # Montar o diretório atual como volume para desenvolvimento
+      - .:/app
+      # Excluir node_modules do volume
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      # host.docker.internal é um DNS especial que aponta para o host em Docker para Mac/Windows
+      # Para Linux, precisamos adicionar extra_hosts na versão mais recente do Docker
+      - HOST_MACHINE_ADDRESS=host.docker.internal
+    # Adicionar para suporte ao host.docker.internal no Linux
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # Reiniciar sempre se o container cair
+    restart: unless-stopped
+    # Para desenvolvimento, usar o nodemon para atualizar a aplicação quando os arquivos mudarem
+    command: npm run dev
