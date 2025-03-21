@@ -1,0 +1,81 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Disparar para qualquer tag que comece com 'v'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Extract tag name
+        id: tag
+        run: echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+      - name: Build Docker image
+        run: |
+          docker build -f Dockerfile.pkg -t sc2-overlay-builder .
+      
+      - name: Create dist directory
+        run: mkdir -p dist
+      
+      - name: Extract full package
+        run: |
+          docker run --rm -v ${{ github.workspace }}/dist:/output sc2-overlay-builder cp /app/sc2-overlay-win64.zip /output/
+      
+      - name: Create versioned package
+        run: |
+          TAG_NAME="${{ steps.tag.outputs.tag_name }}"
+          cp ${{ github.workspace }}/dist/sc2-overlay-win64.zip ${{ github.workspace }}/dist/sc2-overlay-$TAG_NAME.zip
+      
+      - name: Extract executable
+        run: |
+          cd dist
+          unzip sc2-overlay-win64.zip -d temp
+          cd temp
+          mkdir -p ../exe-only
+          cp sc2-overlay.exe ../exe-only/
+      
+      - name: Create versioned executable
+        run: |
+          TAG_NAME="${{ steps.tag.outputs.tag_name }}"
+          cd dist/exe-only
+          zip -r ../sc2-overlay-exe-only-$TAG_NAME.zip sc2-overlay.exe
+      
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ${{ github.workspace }}/dist/sc2-overlay-${{ steps.tag.outputs.tag_name }}.zip
+            ${{ github.workspace }}/dist/sc2-overlay-exe-only-${{ steps.tag.outputs.tag_name }}.zip
+          draft: false
+          prerelease: false
+          name: Release ${{ steps.tag.outputs.tag_name }}
+          body: |
+            # SC2 Stream Overlay Release ${{ steps.tag.outputs.tag_name }}
+            
+            ## Arquivos disponíveis:
+            
+            - **sc2-overlay-${{ steps.tag.outputs.tag_name }}.zip**: Pacote completo com executável e todos os arquivos necessários
+            - **sc2-overlay-exe-only-${{ steps.tag.outputs.tag_name }}.zip**: Apenas o executável, para atualizações rápidas
+            
+            ## Instruções:
+            
+            ### Para nova instalação:
+            1. Baixe o pacote completo
+            2. Extraia em qualquer pasta
+            3. Execute o arquivo sc2-overlay.exe
+            
+            ### Para atualização:
+            1. Baixe apenas o executável
+            2. Substitua o executável existente
+            3. Mantenha seus arquivos de configuração e dados intactos
