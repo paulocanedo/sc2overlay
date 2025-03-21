@@ -1,0 +1,52 @@
+FROM node:18 AS builder
+
+WORKDIR /app
+
+# Instalar dependências necessárias
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar arquivo de dependências primeiro para aproveitar o cache do Docker
+COPY package*.json ./
+
+# Instalar dependências incluindo as de desenvolvimento
+RUN npm install
+
+# Copiar arquivos do projeto
+COPY . .
+
+# Instalar pkg globalmente
+RUN npm install -g pkg
+
+# Empacotar a aplicação
+RUN pkg . \
+    --targets node18-win-x64 \
+    --output sc2-overlay.exe
+
+# Criar diretório de distribuição
+RUN mkdir -p /app/dist
+
+# Copiar arquivos para a distribuição
+RUN cp sc2-overlay.exe /app/dist/ && \
+    cp -r public /app/dist/ && \
+    cp config.yaml.example /app/dist/config.yaml
+
+# Fase final para criar o ZIP
+FROM alpine:latest
+
+WORKDIR /app
+
+# Instalar zip
+RUN apk add --no-cache zip
+
+# Copiar da fase de build
+COPY --from=builder /app/dist /app/dist
+
+# Criar arquivo ZIP
+RUN cd /app/dist && zip -r /app/sc2-overlay-win64.zip *
+
+# Volume para acessar o ZIP
+VOLUME /output

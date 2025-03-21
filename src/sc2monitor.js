@@ -4,11 +4,22 @@ const EventEmitter = require('./eventEmitter');
 class SC2Monitor {
   constructor(config) {
     this.config = config;
-    this.apiUrl = config.sc2_client.api_url;
+    
+    // Forçar o uso de IPv4 para resolver o problema de conexão
+    let apiUrl = config.sc2_client.api_url;
+    if (apiUrl.includes('localhost')) {
+      apiUrl = apiUrl.replace('localhost', '127.0.0.1');
+    } else if (apiUrl.includes('::1')) {
+      apiUrl = apiUrl.replace('::1', '127.0.0.1');
+    }
+    
+    this.apiUrl = apiUrl;
+    console.log(`Conectando à API SC2 em: ${this.apiUrl}`);
+    
     this.pollInterval = config.sc2_client.poll_interval;
     this.retryInterval = config.sc2_client.retry_interval || 5000;
     this.playerName = config.player.name;
-    this.exactMatch = config.player.exact_match !== false; // Por padrão, true se não especificado
+    this.exactMatch = config.player.exact_match !== false;
     this.events = new EventEmitter();
     
     // Estado atual
