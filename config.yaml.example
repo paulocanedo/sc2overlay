@@ -8,7 +8,7 @@ player:
 
 # Configurações do cliente SC2
 sc2_client:
-  api_url: "http://localhost:6119"  # URL padrão da API do cliente SC2
+  api_url: "http://127.0.0.1:6119"  # URL padrão da API do cliente SC2
   # api_url: "http://host.docker.internal:6119"  # se estiver rodando em docker
   poll_interval: 2000  # Intervalo de polling em ms (2 segundos)
   retry_interval: 5000  # Intervalo para novas tentativas após erro
