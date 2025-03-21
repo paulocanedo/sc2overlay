@@ -1,0 +1,83 @@
+name: Update Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New version (semver)'
+        required: true
+        default: '1.0.0'
+      type:
+        description: 'Release type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Update version from input
+        if: github.event.inputs.version != ''
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          jq '.version = "'$VERSION'"' package.json > package.json.tmp
+          mv package.json.tmp package.json
+      
+      - name: Increment version
+        if: github.event.inputs.version == ''
+        run: |
+          TYPE="${{ github.event.inputs.type }}"
+          CURRENT_VERSION=$(jq -r '.version' package.json)
+          
+          # Split version string
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR="${VERSION_PARTS[0]}"
+          MINOR="${VERSION_PARTS[1]}"
+          PATCH="${VERSION_PARTS[2]}"
+          
+          # Increment based on type
+          if [[ "$TYPE" == "major" ]]; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif [[ "$TYPE" == "minor" ]]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
+          
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          jq '.version = "'$NEW_VERSION'"' package.json > package.json.tmp
+          mv package.json.tmp package.json
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+      
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add package.json
+          git commit -m "Bump version to ${{ github.event.inputs.version || env.NEW_VERSION }}"
+          git push
+      
+      - name: Create tag
+        run: |
+          VERSION="${{ github.event.inputs.version || env.NEW_VERSION }}"
+          git tag -a "v$VERSION" -m "Version $VERSION"
+          git push origin "v$VERSION"
