@@ -31,6 +31,16 @@ class StatsTracker {
     }
   }
   
+  // Adicionar método para definir estatísticas a partir do banco de dados
+  setStats(newStats) {
+    if (newStats && typeof newStats === 'object') {
+      this.stats = newStats;
+      console.log('Estatísticas atualizadas externamente');
+      // Salvar as estatísticas no arquivo também
+      this.saveStats();
+    }
+  }
+  
   async loadStats() {
     try {
       // Garantir que o diretório existe

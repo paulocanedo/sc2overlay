@@ -1,21 +1,33 @@
 {
-    "name": "sc2-stream-overlay",
-    "version": "1.0.0",
-    "description": "Overlay de estatísticas de StarCraft II para streams",
-    "main": "server.js",
-    "scripts": {
-      "start": "node server.js",
-      "dev": "nodemon server.js"
-    },
-    "author": "",
-    "license": "MIT",
-    "dependencies": {
-      "axios": "^0.27.2",
-      "express": "^4.18.1",
-      "js-yaml": "^4.1.0",
-      "socket.io": "^4.5.1"
-    },
-    "devDependencies": {
-      "nodemon": "^2.0.19"
-    }
+  "name": "sc2-stream-overlay",
+  "version": "1.0.0",
+  "description": "Overlay de estatísticas de StarCraft II para streams",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "pkg ."
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "better-sqlite3": "^8.4.0",
+    "express": "^4.18.1",
+    "js-yaml": "^4.1.0",
+    "socket.io": "^4.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19",
+    "pkg": "^5.8.1"
+  },
+  "bin": "server.js",
+  "pkg": {
+    "targets": ["node16-win-x64"],
+    "assets": [
+      "public/**/*",
+      "node_modules/**/*"
+    ],
+    "outputPath": "dist"
   }
+}

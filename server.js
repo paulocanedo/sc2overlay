@@ -12,6 +12,7 @@ const config = yaml.load(configFile);
 // Importar módulos
 const SC2Monitor = require('./src/sc2monitor');
 const StatsTracker = require('./src/statsTracker');
+const Database = require('./src/db');
 
 // Inicializar aplicação
 const app = express();
@@ -73,8 +74,40 @@ app.get('/api/status', (req, res) => {
   });
 });
 
+// Rota para obter partidas recentes
+app.get('/api/matches/recent', async (req, res) => {
+  const limit = parseInt(req.query.limit) || 10;
+  try {
+    const matches = await database.getRecentMatches(limit);
+    res.json(matches);
+  } catch (error) {
+    console.error('Erro ao obter partidas recentes:', error);
+    res.status(500).json({ error: 'Erro ao obter partidas recentes' });
+  }
+});
+
 // Inicializar rastreador de estatísticas
 const statsTracker = new StatsTracker(config);
+
+// Inicializar banco de dados
+const database = new Database(config);
+database.initialize().then(success => {
+  if (success) {
+    console.log('Banco de dados inicializado com sucesso');
+    
+    // Carregar estatísticas do banco para o rastreador, se disponíveis
+    database.getMatchStats().then(dbStats => {
+      if (dbStats) {
+        statsTracker.setStats(dbStats);
+        console.log('Estatísticas carregadas do banco de dados');
+      }
+    }).catch(err => {
+      console.error('Erro ao carregar estatísticas do banco:', err);
+    });
+  } else {
+    console.warn('Usando armazenamento de estatísticas apenas em arquivo JSON');
+  }
+});
 
 // Inicializar monitor SC2
 const sc2Monitor = new SC2Monitor(config);
@@ -87,8 +120,33 @@ sc2Monitor.on('gameStarted', (data) => {
 
 sc2Monitor.on('gameEnded', (data) => {
   console.log('Partida finalizada:', data);
-  // Registrar estatísticas
+  
+  // Registrar estatísticas no rastreador
   statsTracker.recordGameEnd(data);
+  
+  // Registrar partida no banco de dados
+  if (database.connected && data.myPlayer) {
+    const opponent = data.players.find(p => p.name !== data.myPlayer.name);
+    
+    if (opponent) {
+      database.recordMatch({
+        playerName: data.myPlayer.name,
+        opponentName: opponent.name,
+        playerRace: data.myPlayer.race,
+        opponentRace: opponent.race,
+        result: data.myPlayer.result,
+        isReplay: false,
+        rawData: JSON.stringify(data)
+      }).then(id => {
+        if (id) {
+          console.log(`Partida registrada no banco de dados com ID: ${id}`);
+        }
+      }).catch(err => {
+        console.error('Erro ao registrar partida no banco de dados:', err);
+      });
+    }
+  }
+  
   // Enviar estatísticas atualizadas
   io.emit('gameEnded', data);
   io.emit('statsUpdated', statsTracker.getStats());
@@ -104,6 +162,16 @@ sc2Monitor.on('screenChanged', (data) => {
   io.emit('screenChanged', data);
 });
 
+sc2Monitor.on('sc2Connected', () => {
+  console.log('Conectado ao cliente SC2');
+  io.emit('sc2Connected');
+});
+
+sc2Monitor.on('sc2Disconnected', () => {
+  console.log('Desconectado do cliente SC2');
+  io.emit('sc2Disconnected');
+});
+
 // Socket.IO para comunicação em tempo real
 io.on('connection', (socket) => {
   console.log('Cliente conectado');
@@ -114,6 +182,18 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('Cliente desconectado');
   });
+});
+
+// Tratamento para encerramento gracioso
+process.on('SIGINT', async () => {
+  console.log('Encerrando aplicação...');
+  
+  // Fechar conexão com o banco de dados
+  if (database) {
+    await database.close();
+  }
+  
+  process.exit(0);
 });
 
 // Iniciar servidor
