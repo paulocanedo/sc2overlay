@@ -19,9 +19,7 @@ const elements = {
   randomWins: document.getElementById('random-wins'),
   randomLosses: document.getElementById('random-losses'),
   lastOpponentName: document.getElementById('last-opponent-name'),
-  lastOpponentRace: document.getElementById('last-opponent-race'),
   lastOpponentRaceIcon: document.getElementById('last-opponent-race-icon'),
-  lastGameResult: document.getElementById('last-game-result'),
   lastGameTime: document.getElementById('last-game-time'),
   currentStatus: document.getElementById('current-status'),
   lastGameContainer: document.getElementById('last-game-container'),
@@ -62,10 +60,10 @@ function formatTimeAgo(timestamp) {
 
 function getRaceIcon(race) {
   switch (race) {
-    case 'Zerg': return '<i class="fas fa-bug"></i>';
-    case 'Terr': return '<i class="fas fa-rocket"></i>';
-    case 'Prot': return '<i class="fas fa-atom"></i>';
-    case 'random': return '<i class="fas fa-dice"></i>';
+    case 'Zerg': return '<img src="/img/race/zerg.svg" alt="Zerg" class="race-icon-img">';
+    case 'Terr': return '<img src="/img/race/terran.svg" alt="Terran" class="race-icon-img">';
+    case 'Prot': return '<img src="/img/race/protoss.svg" alt="Protoss" class="race-icon-img">';
+    case 'random': return '<img src="/img/race/random.svg" alt="Random" class="race-icon-img">';
     default: return '';
   }
 }
@@ -82,51 +80,85 @@ function updateStatus(status, message) {
   }
 }
 
-// Funções de atualização da interface
+// Função para atualizar as informações do último jogo
+function updateLastGameInfo(lastGame) {
+  if (lastGame && lastGame.opponent) {
+    elements.noGame.classList.add('sc2-hidden');
+    elements.gameInfo.classList.remove('sc2-hidden');
+    
+    elements.lastOpponentName.textContent = lastGame.opponent.name || 'Desconhecido';
+    
+    if (lastGame.opponent.race) {
+      elements.lastOpponentRaceIcon.innerHTML = getRaceIcon(lastGame.opponent.race);
+    } else {
+      elements.lastOpponentRaceIcon.innerHTML = '';
+    }
+    
+    // Mostrar ícone de vitória ou derrota
+    const victoryIcon = document.getElementById('victory-icon');
+    const defeatIcon = document.getElementById('defeat-icon');
+    
+    if (victoryIcon && defeatIcon) {
+      if (lastGame.result === 'Victory') {
+        victoryIcon.style.display = 'inline-block';
+        defeatIcon.style.display = 'none';
+      } else {
+        victoryIcon.style.display = 'none';
+        defeatIcon.style.display = 'inline-block';
+      }
+    }
+    
+    elements.lastGameTime.textContent = formatTimeAgo(lastGame.timestamp);
+  } else {
+    elements.noGame.classList.remove('sc2-hidden');
+    elements.gameInfo.classList.add('sc2-hidden');
+  }
+}
+
+// Função principal para atualizar estatísticas
 function updateStats(stats) {
   if (!stats) return;
   
   // Estatísticas gerais
-  elements.totalGames.textContent = stats.total.games;
-  elements.totalWins.textContent = stats.total.wins;
-  elements.totalLosses.textContent = stats.total.losses;
-  
-  // Calcular porcentagem de vitórias
-  const winPercentage = stats.total.games > 0 
-    ? Math.round((stats.total.wins / stats.total.games) * 100) 
-    : 0;
-  elements.winPercentage.textContent = `${winPercentage}%`;
+  if (stats.total) {
+    elements.totalGames.textContent = stats.total.games || 0;
+    elements.totalWins.textContent = stats.total.wins || 0;
+    elements.totalLosses.textContent = stats.total.losses || 0;
+    
+    // Calcular porcentagem de vitórias
+    const totalGames = stats.total.games || 0;
+    const totalWins = stats.total.wins || 0;
+    const winPercentage = totalGames > 0 
+      ? Math.round((totalWins / totalGames) * 100) 
+      : 0;
+    elements.winPercentage.textContent = `${winPercentage}%`;
+  }
   
   // Estatísticas por raça
-  elements.zergWins.textContent = stats.byRace.Zerg.wins;
-  elements.zergLosses.textContent = stats.byRace.Zerg.losses;
-  
-  elements.terranWins.textContent = stats.byRace.Terr.wins;
-  elements.terranLosses.textContent = stats.byRace.Terr.losses;
-  
-  elements.protossWins.textContent = stats.byRace.Prot.wins;
-  elements.protossLosses.textContent = stats.byRace.Prot.losses;
-  
-  elements.randomWins.textContent = stats.byRace.random.wins;
-  elements.randomLosses.textContent = stats.byRace.random.losses;
+  if (stats.byRace) {
+    if (stats.byRace.Zerg) {
+      elements.zergWins.textContent = stats.byRace.Zerg.wins || 0;
+      elements.zergLosses.textContent = stats.byRace.Zerg.losses || 0;
+    }
+    
+    if (stats.byRace.Terr) {
+      elements.terranWins.textContent = stats.byRace.Terr.wins || 0;
+      elements.terranLosses.textContent = stats.byRace.Terr.losses || 0;
+    }
+    
+    if (stats.byRace.Prot) {
+      elements.protossWins.textContent = stats.byRace.Prot.wins || 0;
+      elements.protossLosses.textContent = stats.byRace.Prot.losses || 0;
+    }
+    
+    if (stats.byRace.random) {
+      elements.randomWins.textContent = stats.byRace.random.wins || 0;
+      elements.randomLosses.textContent = stats.byRace.random.losses || 0;
+    }
+  }
   
   // Último jogo
-  if (stats.lastGame) {
-    elements.noGame.classList.add('hidden');
-    elements.gameInfo.classList.remove('hidden');
-    
-    elements.lastOpponentName.textContent = stats.lastGame.opponent.name || 'Desconhecido';
-    elements.lastOpponentRace.textContent = stats.lastGame.opponent.race || 'Desconhecido';
-    elements.lastOpponentRaceIcon.innerHTML = getRaceIcon(stats.lastGame.opponent.race);
-    
-    elements.lastGameResult.textContent = stats.lastGame.result;
-    elements.lastGameResult.className = stats.lastGame.result === 'Victory' ? 'victory' : 'defeat';
-    
-    elements.lastGameTime.textContent = formatTimeAgo(stats.lastGame.timestamp);
-  } else {
-    elements.noGame.classList.remove('hidden');
-    elements.gameInfo.classList.add('hidden');
-  }
+  updateLastGameInfo(stats.lastGame);
 }
 
 // Carregar configuração
@@ -136,12 +168,12 @@ async function loadConfig() {
     appState.config = await response.json();
     
     // Atualizar título
-    if (appState.config.overlay.title) {
+    if (appState.config && appState.config.overlay && appState.config.overlay.title) {
       elements.panelTitle.textContent = appState.config.overlay.title;
     }
     
     // Aplicar tema
-    if (appState.config.overlay.theme === 'light') {
+    if (appState.config && appState.config.overlay && appState.config.overlay.theme === 'light') {
       document.body.classList.add('light-theme');
     }
     
@@ -157,6 +189,7 @@ async function loadStats() {
     const response = await fetch('/api/stats');
     const stats = await response.json();
     updateStats(stats);
+    console.log('Estatísticas iniciais carregadas com sucesso');
   } catch (error) {
     console.error('Erro ao carregar estatísticas:', error);
   }
@@ -184,7 +217,7 @@ socket.on('gameStarted', (data) => {
   appState.inGame = true;
   
   let opponentName = "Desconhecido";
-  if (data.players && data.players.length >= 1) {
+  if (data && data.players && data.players.length >= 1) {
     opponentName = data.players[0].name;
   }
   
@@ -195,6 +228,21 @@ socket.on('gameEnded', (data) => {
   console.log('Partida finalizada:', data);
   appState.inGame = false;
   updateStatus('online', 'Jogo finalizado');
+  
+  // Se temos informação sobre o jogador, atualizar as informações do último jogo
+  if (data && data.myPlayer) {
+    const opponent = data.players.find(p => p.name !== data.myPlayer.name);
+    if (opponent) {
+      const lastGameInfo = {
+        timestamp: new Date().toISOString(),
+        myPlayer: data.myPlayer,
+        opponent: opponent,
+        result: data.myPlayer.result
+      };
+      
+      updateLastGameInfo(lastGameInfo);
+    }
+  }
 });
 
 socket.on('replayStarted', (data) => {
@@ -204,15 +252,17 @@ socket.on('replayStarted', (data) => {
 });
 
 socket.on('screenChanged', (data) => {
+  if (!data) return;
+  
   console.log('Tela alterada:', data);
-  appState.currentScreen = data.toScreen;
+  appState.currentScreen = data.toScreen || 'Unknown';
   
   if (data.toScreen === 'InGame') {
     appState.inGame = true;
     updateStatus('ingame', 'Em jogo');
   } else {
     appState.inGame = false;
-    updateStatus('online', `Na tela ${data.toScreen}`);
+    updateStatus('online', `Na tela ${data.toScreen || 'desconhecida'}`);
   }
 });
 

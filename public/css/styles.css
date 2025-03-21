@@ -15,6 +15,7 @@
   --random-color: #7e7e7e;
 }
 
+/* Reset básico */
 * {
   margin: 0;
   padding: 0;
@@ -31,6 +32,7 @@ body {
   align-items: center;
 }
 
+/* Layout principal */
 .overlay-container {
   width: 350px;
   min-height: 600px;
@@ -44,6 +46,7 @@ body {
   border: 1px solid var(--border-color);
 }
 
+/* Cabeçalho */
 .panel-header {
   background-color: var(--header-bg);
   padding: 15px 20px;
@@ -84,6 +87,7 @@ body {
   font-size: 14px;
 }
 
+/* Container principal de estatísticas */
 .stats-container {
   padding: 20px;
 }
@@ -101,6 +105,7 @@ body {
   color: var(--accent-color);
 }
 
+/* Linha de estatísticas */
 .stat-row {
   display: flex;
   justify-content: space-between;
@@ -135,14 +140,7 @@ body {
   opacity: 0.8;
 }
 
-.victory .stat-value {
-  color: var(--victory-color);
-}
-
-.defeat .stat-value {
-  color: var(--defeat-color);
-}
-
+/* Estatísticas de raça */
 .race-stats {
   display: flex;
   flex-direction: column;
@@ -167,6 +165,7 @@ body {
   margin-right: 10px;
 }
 
+/* Background colors para ícones de raça */
 .race-icon.zerg {
   background-color: var(--zerg-color);
 }
@@ -183,13 +182,33 @@ body {
   background-color: var(--random-color);
 }
 
+/* Estilos de ícones SVG */
+.race-icon-img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+/* Remover filtro do ícone no último jogo */
+.last-race-icon img {
+  width: 20px;
+  height: 20px;
+  filter: none;
+}
+
 .race-data {
   flex: 1;
 }
 
+.race-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .race-name {
   font-size: 14px;
-  margin-bottom: 3px;
+  font-weight: 500;
 }
 
 .race-record {
@@ -197,6 +216,7 @@ body {
   font-weight: 700;
 }
 
+/* Último jogo */
 .last-game {
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 5px;
@@ -221,10 +241,39 @@ body {
   opacity: 0.8;
 }
 
-.opponent-race i {
-  margin-left: 5px;
+/* Último jogo - formato compacto */
+.last-match-compact {
+  display: flex;
+  align-items: center;
+  padding: 5px 0;
 }
 
+.last-race-icon {
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.last-opponent-name {
+  flex: 1;
+  font-weight: 600;
+  margin-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.last-result-icon {
+  margin-right: 10px;
+}
+
+.last-game-time {
+  font-size: 12px;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+/* Rodapé */
 .panel-footer {
   background-color: var(--header-bg);
   padding: 10px 20px;
@@ -238,15 +287,25 @@ body {
   opacity: 0.8;
 }
 
-.hidden {
-  display: none;
+/* Estilos de estados */
+.sc2-hidden {
+  display: none !important;
 }
 
-.victory {
+.overlay-panel .hidden {
+  display: none !important;
+}
+
+/* Cores de vitória e derrota */
+.victory,
+.victory .stat-value,
+.last-result-icon i.victory-icon {
   color: var(--victory-color);
 }
 
-.defeat {
+.defeat,
+.defeat .stat-value,
+.last-result-icon i.defeat-icon {
   color: var(--defeat-color);
 }
 

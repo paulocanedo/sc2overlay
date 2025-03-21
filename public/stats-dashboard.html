@@ -49,48 +49,48 @@
           <div class="race-stats">
             <div class="race-stat" id="zerg-stats">
               <div class="race-icon zerg">
-                <i class="fas fa-bug"></i>
+                <img src="/img/race/zerg.svg" alt="Zerg" class="race-icon-img">
               </div>
               <div class="race-data">
-                <div class="race-name">Zerg</div>
-                <div class="race-record">
-                  <span id="zerg-wins">0</span>-<span id="zerg-losses">0</span>
+                <div class="race-info">
+                  <span class="race-name">Zerg</span>
+                  <span class="race-record"><span id="zerg-wins">0</span>-<span id="zerg-losses">0</span></span>
                 </div>
               </div>
             </div>
             
             <div class="race-stat" id="terran-stats">
               <div class="race-icon terran">
-                <i class="fas fa-rocket"></i>
+                <img src="/img/race/terran.svg" alt="Terran" class="race-icon-img">
               </div>
               <div class="race-data">
-                <div class="race-name">Terran</div>
-                <div class="race-record">
-                  <span id="terran-wins">0</span>-<span id="terran-losses">0</span>
+                <div class="race-info">
+                  <span class="race-name">Terran</span>
+                  <span class="race-record"><span id="terran-wins">0</span>-<span id="terran-losses">0</span></span>
                 </div>
               </div>
             </div>
             
             <div class="race-stat" id="protoss-stats">
               <div class="race-icon protoss">
-                <i class="fas fa-atom"></i>
+                <img src="/img/race/protoss.svg" alt="Protoss" class="race-icon-img">
               </div>
               <div class="race-data">
-                <div class="race-name">Protoss</div>
-                <div class="race-record">
-                  <span id="protoss-wins">0</span>-<span id="protoss-losses">0</span>
+                <div class="race-info">
+                  <span class="race-name">Protoss</span>
+                  <span class="race-record"><span id="protoss-wins">0</span>-<span id="protoss-losses">0</span></span>
                 </div>
               </div>
             </div>
             
             <div class="race-stat" id="random-stats">
               <div class="race-icon random">
-                <i class="fas fa-dice"></i>
+                <img src="/img/race/random.svg" alt="Random" class="race-icon-img">
               </div>
               <div class="race-data">
-                <div class="race-name">Random</div>
-                <div class="race-record">
-                  <span id="random-wins">0</span>-<span id="random-losses">0</span>
+                <div class="race-info">
+                  <span class="race-name">Random</span>
+                  <span class="race-record"><span id="random-wins">0</span>-<span id="random-losses">0</span></span>
                 </div>
               </div>
             </div>
@@ -101,23 +101,15 @@
           <h2>Último Jogo</h2>
           <div class="last-game" id="last-game-container">
             <div class="no-game">Nenhuma partida registrada</div>
-            <div class="game-info hidden">
-              <div class="opponent-info">
-                <span class="label">Oponente:</span>
-                <span id="last-opponent-name">-</span>
-              </div>
-              <div class="opponent-race">
-                <span class="label">Raça:</span>
-                <span id="last-opponent-race">-</span>
-                <span id="last-opponent-race-icon"></span>
-              </div>
-              <div class="game-result">
-                <span class="label">Resultado:</span>
-                <span id="last-game-result">-</span>
-              </div>
-              <div class="game-time">
-                <span class="label">Quando:</span>
-                <span id="last-game-time">-</span>
+            <div class="game-info sc2-hidden">
+              <div class="last-match-compact">
+                <span id="last-opponent-race-icon" class="last-race-icon"></span>
+                <span id="last-opponent-name" class="last-opponent-name">-</span>
+                <span class="last-result-icon">
+                  <i id="victory-icon" class="fas fa-trophy" style="display: none; color: var(--victory-color);"></i>
+                  <i id="defeat-icon" class="fas fa-times" style="display: none; color: var(--defeat-color);"></i>
+                </span>
+                <span id="last-game-time" class="last-game-time">-</span>
               </div>
             </div>
           </div>

@@ -51,10 +51,10 @@ function getRaceClass(race) {
 
 function getRaceIcon(race) {
   switch (race) {
-    case 'Zerg': return '<i class="fas fa-bug"></i>';
-    case 'Terr': return '<i class="fas fa-rocket"></i>';
-    case 'Prot': return '<i class="fas fa-atom"></i>';
-    case 'random': return '<i class="fas fa-dice"></i>';
+    case 'Zerg': return '<img src="/img/race/zerg.svg" alt="Zerg" class="race-icon-img">';
+    case 'Terr': return '<img src="/img/race/terran.svg" alt="Terran" class="race-icon-img">';
+    case 'Prot': return '<img src="/img/race/protoss.svg" alt="Protoss" class="race-icon-img">';
+    case 'random': return '<img src="/img/race/random.svg" alt="Random" class="race-icon-img">';
     default: return '<i class="fas fa-question"></i>';
   }
 }
