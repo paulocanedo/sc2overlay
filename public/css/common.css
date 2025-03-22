@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Orbitron:wght@400;700&display=swap');
+
+:root {
+  /* Cores principais */
+  --bg-color: #0a0c14;
+  --panel-bg: #141824;
+  --header-bg: #1c2133;
+  --text-color: #e0e0e0;
+  --accent-color: #00a8ff;
+  --victory-color: #4caf50;
+  --defeat-color: #f44336;
+  --border-color: #2a3042;
+  
+  /* Cores de raças */
+  --zerg-color: #8b00ff;
+  --terran-color: #1e88e5;
+  --protoss-color: #ffa000;
+  --random-color: #7e7e7e;
+}
+
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: transparent;
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Estilos comuns para cabeçalhos */
+.panel-header {
+  background-color: var(--header-bg);
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h1 {
+  font-family: 'Orbitron', sans-serif;
+  color: var(--accent-color);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+/* Status padrão */
+.status-indicator .offline i {
+  color: var(--defeat-color);
+}
+
+.status-indicator .online i {
+  color: var(--victory-color);
+}
+
+.status-indicator .ingame i {
+  color: var(--accent-color);
+}
+
+/* Cores para ícones de raça */
+.race-icon.zerg {
+  background-color: var(--zerg-color);
+}
+
+.race-icon.terran {
+  background-color: var(--terran-color);
+}
+
+.race-icon.protoss {
+  background-color: var(--protoss-color);
+}
+
+.race-icon.random {
+  background-color: var(--random-color);
+}
+
+/* Cores de vitória e derrota */
+.victory,
+.victory .stat-value,
+.last-result-icon i.victory-icon {
+  color: var(--victory-color);
+}
+
+.defeat,
+.defeat .stat-value,
+.last-result-icon i.defeat-icon {
+  color: var(--defeat-color);
+}
+
+/* Estilos para ícones SVG */
+.race-icon-img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+/* Animações */
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Estilos de estados */
+.hidden {
+  display: none !important;
+}
+
+.sc2-hidden {
+  display: none !important;
+}
