@@ -4,7 +4,6 @@ const socket = io();
 // Elementos da interface
 const elements = {
   statusIcon: document.getElementById('status-icon'),
-  statusText: document.getElementById('status-text'),
   panelTitle: document.getElementById('panel-title'),
   totalGames: document.getElementById('total-games'),
   totalWins: document.getElementById('total-wins'),
@@ -24,7 +23,9 @@ const elements = {
   currentStatus: document.getElementById('current-status'),
   lastGameContainer: document.getElementById('last-game-container'),
   noGame: document.querySelector('.no-game'),
-  gameInfo: document.querySelector('.game-info')
+  gameInfo: document.querySelector('.game-info'),
+  // Blocos de resultado recentes
+  resultBlocks: Array.from({ length: 10 }, (_, i) => document.getElementById(`result-block-${i}`))
 };
 
 // Estado da aplicação
@@ -32,7 +33,8 @@ let appState = {
   connected: false,
   inGame: false,
   currentScreen: 'Unknown',
-  config: null
+  config: null,
+  recentMatches: []
 };
 
 // Funções de utilidade
@@ -70,7 +72,6 @@ function getRaceIcon(race) {
 
 function updateStatus(status, message) {
   elements.statusIcon.className = status;
-  elements.statusText.textContent = message;
   elements.currentStatus.textContent = message;
   
   if (status === 'ingame') {
@@ -112,6 +113,30 @@ function updateLastGameInfo(lastGame) {
   } else {
     elements.noGame.classList.remove('sc2-hidden');
     elements.gameInfo.classList.add('sc2-hidden');
+  }
+}
+
+// Função para atualizar a faixa lateral com resultados recentes
+function updateRecentResultsStrip() {
+  // Limpar todos os blocos primeiro (definir para cinza)
+  elements.resultBlocks.forEach(block => {
+    block.className = 'result-block';
+  });
+  
+  // Preencher com os resultados disponíveis
+  if (appState.recentMatches && appState.recentMatches.length > 0) {
+    // Limitamos a 10 partidas e revertemos para mostrar as mais recentes no topo
+    const matches = appState.recentMatches.slice(0, 10).reverse();
+    
+    matches.forEach((match, index) => {
+      if (index < elements.resultBlocks.length) {
+        if (match.result === 'Victory') {
+          elements.resultBlocks[index].className = 'result-block victory';
+        } else if (match.result === 'Defeat') {
+          elements.resultBlocks[index].className = 'result-block defeat';
+        }
+      }
+    });
   }
 }
 
@@ -161,6 +186,24 @@ function updateStats(stats) {
   updateLastGameInfo(stats.lastGame);
 }
 
+// Carregar partidas recentes
+async function loadRecentMatches() {
+  try {
+    const response = await fetch('/api/matches/recent?limit=10');
+    const matches = await response.json();
+    
+    console.log('Partidas recentes carregadas:', matches);
+    
+    // Armazenar no estado da aplicação
+    appState.recentMatches = matches;
+    
+    // Atualizar a faixa de resultados
+    updateRecentResultsStrip();
+  } catch (error) {
+    console.error('Erro ao carregar partidas recentes:', error);
+  }
+}
+
 // Carregar configuração
 async function loadConfig() {
   try {
@@ -204,6 +247,7 @@ socket.on('connect', () => {
   // Carregar configuração e estatísticas iniciais
   loadConfig();
   loadStats();
+  loadRecentMatches();
 });
 
 socket.on('disconnect', () => {
@@ -241,6 +285,9 @@ socket.on('gameEnded', (data) => {
       };
       
       updateLastGameInfo(lastGameInfo);
+      
+      // Recarregar partidas recentes
+      setTimeout(loadRecentMatches, 1000);
     }
   }
 });
@@ -269,6 +316,9 @@ socket.on('screenChanged', (data) => {
 socket.on('statsUpdated', (stats) => {
   console.log('Estatísticas atualizadas:', stats);
   updateStats(stats);
+  
+  // Recarregar partidas recentes quando estatísticas forem atualizadas
+  loadRecentMatches();
 });
 
 // Inicialização

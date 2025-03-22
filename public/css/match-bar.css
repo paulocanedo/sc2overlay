@@ -1,31 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Orbitron:wght@400;700&display=swap');
+@import 'common.css';
 
+/* Estilos específicos para o Match Bar */
 :root {
   --bg-color: rgba(10, 12, 20, 0.85);
-  --text-color: #e0e0e0;
-  --accent-color: #00a8ff;
-  --border-color: #2a3042;
-  --zerg-color: #8b00ff;
-  --terran-color: #1e88e5;
-  --protoss-color: #ffa000;
-  --random-color: #7e7e7e;
   --replay-color: #f44336;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
-  font-family: 'Roboto', sans-serif;
-  background-color: transparent;
-  color: var(--text-color);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   overflow: hidden;
 }
 
@@ -74,28 +55,6 @@ body {
   margin: 0 10px;
 }
 
-.race-icon-img {
-  width: 20px;
-  height: 20px;
-  filter: brightness(0) invert(1);
-}
-
-.player-race.zerg {
-  background-color: var(--zerg-color);
-}
-
-.player-race.terran {
-  background-color: var(--terran-color);
-}
-
-.player-race.protoss {
-  background-color: var(--protoss-color);
-}
-
-.player-race.random {
-  background-color: var(--random-color);
-}
-
 .player-name {
   font-weight: 700;
   font-size: 16px;
@@ -139,20 +98,6 @@ body {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-.hidden {
-  display: none;
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.fade-in {
-  animation: fadeIn 0.5s ease-in;
 }
 
 /* Media Queries */
