@@ -17,24 +17,25 @@
 
 /* Faixa de resultados recentes */
 .recent-results-strip {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 4px;
-  height: 100%;
+  position: static; /* Remover posicionamento absoluto */
+  top: auto;
+  right: auto;
+  width: 100%; /* Ocupar toda a largura */
+  height: auto; /* Altura automática */
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Mudar para horizontal */
   justify-content: space-between;
-  padding: 10px 0;
-  z-index: 10;
+  padding: 0;
+  margin-bottom: 0; /* Sem espaço entre a faixa e o rodapé */
+  background-color: var(--header-bg); /* Mesma cor do cabeçalho */
+  border-top: 1px solid var(--border-color); /* Adicionar borda no topo */
 }
 
 .result-block {
   flex: 1;
-  width: 100%;
-  background-color: #555; /* Cor cinza para partidas não jogadas */
-  margin: 2px 0;
-  border-radius: 1px;
+  height: 4px; /* Altura fixa para os blocos */
+  margin: 0 2px; /* Espaço horizontal entre os blocos */
+  border-radius: 0; /* Remover arredondamento */
 }
 
 .result-block.victory {
