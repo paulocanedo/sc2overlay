@@ -125,8 +125,8 @@ function updateRecentResultsStrip() {
   
   // Preencher com os resultados disponíveis
   if (appState.recentMatches && appState.recentMatches.length > 0) {
-    // Limitamos a 10 partidas e revertemos para mostrar as mais recentes no topo
-    const matches = appState.recentMatches.slice(0, 10).reverse();
+    // Limitamos a 10 partidas para mostrar as mais recentes no topo
+    const matches = appState.recentMatches.slice(0, 10);
     
     matches.forEach((match, index) => {
       if (index < elements.resultBlocks.length) {

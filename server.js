@@ -19,7 +19,7 @@ function getBasePath() {
 function loadConfig() {
   const basePath = getBasePath();
   const configPath = path.join(basePath, 'config.yaml');
-  
+
   try {
     // Verificar se o arquivo de configuração existe
     if (!fs.existsSync(configPath)) {
@@ -32,7 +32,7 @@ function loadConfig() {
         throw new Error('Arquivo config.yaml.example não encontrado.');
       }
     }
-    
+
     // Carregar o arquivo de configuração
     const configFile = fs.readFileSync(configPath, 'utf8');
     return yaml.load(configFile);
@@ -45,13 +45,13 @@ function loadConfig() {
 // Ajustar caminhos de armazenamento para funcionarem com o executável
 function adjustStoragePaths(config) {
   const basePath = getBasePath();
-  
+
   // Garantir que o diretório de dados exista
   const dataDir = path.join(basePath, 'data');
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
-  
+
   // Ajustar caminhos no config
   if (config.storage) {
     if (config.storage.stats_file) {
@@ -61,7 +61,7 @@ function adjustStoragePaths(config) {
       config.storage.database_path = path.join(basePath, config.storage.database_path);
     }
   }
-  
+
   return config;
 }
 
@@ -164,7 +164,7 @@ const database = new Database(config);
 database.initialize().then(success => {
   if (success) {
     console.log('Banco de dados inicializado com sucesso');
-    
+
     // Carregar estatísticas do banco para o rastreador, se disponíveis
     database.getMatchStats().then(dbStats => {
       if (dbStats) {
@@ -190,14 +190,14 @@ sc2Monitor.on('gameStarted', (data) => {
 
 sc2Monitor.on('gameEnded', (data) => {
   console.log('Partida finalizada:', data);
-  
+
   // Registrar estatísticas no rastreador
   statsTracker.recordGameEnd(data);
-  
+
   // Registrar partida no banco de dados
   if (database.connected && data.myPlayer) {
     const opponent = data.players.find(p => p.name !== data.myPlayer.name);
-    
+
     if (opponent) {
       database.recordMatch({
         playerName: data.myPlayer.name,
@@ -216,7 +216,7 @@ sc2Monitor.on('gameEnded', (data) => {
       });
     }
   }
-  
+
   // Enviar estatísticas atualizadas
   io.emit('gameEnded', data);
   io.emit('statsUpdated', statsTracker.getStats());
@@ -245,10 +245,10 @@ sc2Monitor.on('sc2Disconnected', () => {
 // Socket.IO para comunicação em tempo real
 io.on('connection', (socket) => {
   console.log('Cliente conectado');
-  
+
   // Enviar estatísticas atuais para o cliente que acabou de conectar
   socket.emit('statsUpdated', statsTracker.getStats());
-  
+
   socket.on('disconnect', () => {
     console.log('Cliente desconectado');
   });
@@ -257,12 +257,12 @@ io.on('connection', (socket) => {
 // Tratamento para encerramento gracioso
 process.on('SIGINT', async () => {
   console.log('Encerrando aplicação...');
-  
+
   // Fechar conexão com o banco de dados
   if (database) {
     await database.close();
   }
-  
+
   process.exit(0);
 });
 
@@ -270,7 +270,7 @@ process.on('SIGINT', async () => {
 const PORT = config.server.port || 3000;
 server.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
-  
+
   // Mostrar mensagem amigável para o usuário em caso de executável standalone
   if (process.pkg) {
     console.log('------------------------------------------------');
