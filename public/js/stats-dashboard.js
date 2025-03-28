@@ -8,7 +8,7 @@ const elements = {
   totalGames: document.getElementById('total-games'),
   totalWins: document.getElementById('total-wins'),
   totalLosses: document.getElementById('total-losses'),
-  winPercentage: document.getElementById('win-percentage'),
+  // winPercentage: document.getElementById('win-percentage'),
   zergWins: document.getElementById('zerg-wins'),
   zergLosses: document.getElementById('zerg-losses'),
   terranWins: document.getElementById('terran-wins'),
@@ -24,6 +24,8 @@ const elements = {
   lastGameContainer: document.getElementById('last-game-container'),
   noGame: document.querySelector('.no-game'),
   gameInfo: document.querySelector('.game-info'),
+  winRateCircle: document.getElementById('win-rate-circle'),
+  winPercentageText: document.getElementById('win-percentage-text'),
   // Blocos de resultado recentes
   resultBlocks: Array.from({ length: 10 }, (_, i) => document.getElementById(`result-block-${i}`))
 };
@@ -157,7 +159,24 @@ function updateStats(stats) {
     const winPercentage = totalGames > 0 
       ? Math.round((totalWins / totalGames) * 100) 
       : 0;
-    elements.winPercentage.textContent = `${winPercentage}%`;
+    // elements.winPercentage.textContent = `${winPercentage}%`;
+
+    // Atualizar o gráfico de taxa de vitória
+    if (elements.winRateCircle && elements.winPercentageText) {
+      elements.winPercentageText.textContent = `${winPercentage}%`;
+
+      // Calcular o comprimento da circunferência do círculo (2πr)
+      const circle = elements.winRateCircle;
+      const radius = circle.getAttribute('r');
+      const circumference = 2 * Math.PI * radius;
+
+      // Definir o comprimento do traço baseado na porcentagem
+      const dashLength = (circumference * winPercentage) / 100;
+      const gapLength = circumference - dashLength;
+
+      // Atualizar o círculo
+      circle.setAttribute('stroke-dasharray', `${dashLength} ${gapLength}`);
+    }
   }
   
   // Estatísticas por raça

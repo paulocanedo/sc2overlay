@@ -328,3 +328,84 @@
     font-size: 18px;
   }
 }
+
+/* Estilos para a nova seção de estatísticas gerais */
+
+/* Total de jogos integrado ao título */
+.total-games-count {
+  font-size: 12px;
+  font-weight: normal;
+  opacity: 0.7;
+  margin-left: 5px;
+}
+
+/* Container para a visão geral de estatísticas */
+.stats-overview {
+  display: flex;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  padding: 15px;
+}
+
+/* Estilo para o gráfico circular */
+.win-rate-chart {
+  width: 80px;
+  height: 80px;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.win-rate-chart svg {
+  overflow: visible;
+}
+
+/* Garantir que o texto da porcentagem fique legível */
+.win-rate-chart text {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Estatísticas de vitórias/derrotas */
+.win-loss-stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stat-row-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label-group {
+  display: flex;
+  align-items: center;
+}
+
+.stat-color-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.stat-color-indicator.victory {
+  background-color: var(--victory-color);
+}
+
+.stat-color-indicator.defeat {
+  background-color: var(--defeat-color);
+}
+
+.stat-label {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Melhorias para os valores de estatísticas */
+.win-loss-stats .stat-value {
+  font-size: 22px;
+  font-weight: 700;
+}

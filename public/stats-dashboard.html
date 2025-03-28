@@ -33,26 +33,63 @@
       </div>
       
       <div class="stats-container">
+        <!-- Seção de Estatísticas Gerais -->
         <div class="stats-section">
-          <h2>Estatísticas Gerais</h2>
-          <div class="stat-row">
-            <div class="stat-item">
-              <div class="stat-value" id="total-games">0</div>
-              <div class="stat-label">Partidas</div>
+          <h2>Estatísticas Gerais <span class="total-games-count">(<span id="total-games">0</span> partidas)</span></h2>
+
+          <div class="stats-overview">
+            <!-- Gráfico circular para taxa de vitória -->
+            <div class="win-rate-chart">
+              <svg viewBox="0 0 36 36">
+                <!-- Círculo de fundo (100%) -->
+                <circle cx="18" cy="18" r="15.9155" fill="none" stroke="rgba(255, 255, 255, 0.1)" stroke-width="3" />
+
+                <!-- Círculo de progresso para vitórias (será atualizado via JavaScript) -->
+                <circle
+                        id="win-rate-circle"
+                        cx="18"
+                        cy="18"
+                        r="15.9155"
+                        fill="none"
+                        stroke="var(--victory-color)"
+                        stroke-width="3"
+                        stroke-dasharray="0 100"
+                        stroke-dashoffset="25"
+                        transform="rotate(-90 18 18)"
+                />
+
+                <!-- Texto com a porcentagem de vitórias -->
+                <text
+                        x="18"
+                        y="18"
+                        dy=".4em"
+                        text-anchor="middle"
+                        font-size="10"
+                        fill="white"
+                        font-weight="bold"
+                        id="win-percentage-text">
+                  0%
+                </text>
+              </svg>
             </div>
-            <div class="stat-item victory">
-              <div class="stat-value" id="total-wins">0</div>
-              <div class="stat-label">Vitórias</div>
-            </div>
-            <div class="stat-item defeat">
-              <div class="stat-value" id="total-losses">0</div>
-              <div class="stat-label">Derrotas</div>
-            </div>
-          </div>
-          <div class="stat-row">
-            <div class="stat-item">
-              <div class="stat-value" id="win-percentage">0%</div>
-              <div class="stat-label">Taxa de Vitória</div>
+
+            <!-- Informações de Vitórias/Derrotas -->
+            <div class="win-loss-stats">
+              <div class="stat-row-item">
+                <div class="stat-label-group">
+                  <span class="stat-color-indicator victory"></span>
+                  <span class="stat-label">Vitórias</span>
+                </div>
+                <span class="stat-value victory" id="total-wins">0</span>
+              </div>
+
+              <div class="stat-row-item">
+                <div class="stat-label-group">
+                  <span class="stat-color-indicator defeat"></span>
+                  <span class="stat-label">Derrotas</span>
+                </div>
+                <span class="stat-value defeat" id="total-losses">0</span>
+              </div>
             </div>
           </div>
         </div>
