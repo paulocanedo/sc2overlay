@@ -4,6 +4,22 @@ const socketIo = require('socket.io');
 const path = require('path');
 const yaml = require('js-yaml');
 const fs = require('fs');
+const crypto = require('crypto');
+const TwitchAuth = require('./src/twitchAuth');
+const TwitchAPI = require('./src/twitchApi');
+
+// Middleware para verificar se a Twitch está configurada
+function checkTwitchConfig(req, res, next) {
+  if (!config.twitch || !config.twitch.enabled) {
+    return res.status(403).json({ error: 'Integração com a Twitch não está habilitada. Verifique o arquivo config.yaml.' });
+  }
+
+  if (!config.twitch.client_id || !config.twitch.client_secret) {
+    return res.status(403).json({ error: 'Credenciais da Twitch não configuradas. Verifique o arquivo config.yaml.' });
+  }
+
+  next();
+}
 
 // Função para determinar o caminho base (funciona tanto em desenvolvimento quanto empacotado)
 function getBasePath() {
@@ -89,6 +105,15 @@ function getPublicPath() {
   return path.join(process.cwd(), 'public');
 }
 
+// Inicializar autenticação da Twitch
+const twitchAuth = new TwitchAuth(config);
+
+// Inicializar API da Twitch
+const twitchApi = new TwitchAPI(twitchAuth, config);
+
+// Armazenar estados de autenticação para segurança
+const authStates = new Map();
+
 // Servir arquivos estáticos
 app.use(express.static(getPublicPath()));
 
@@ -154,6 +179,302 @@ app.get('/api/matches/recent', async (req, res) => {
     console.error('Erro ao obter partidas recentes:', error);
     res.status(500).json({ error: 'Erro ao obter partidas recentes' });
   }
+});
+
+// Rota para obter dados da Twitch
+app.get('/api/twitch/stats', async (req, res) => {
+  try {
+    // Em uma implementação real, aqui teríamos código para acessar
+    // a API da Twitch usando as credenciais configuradas
+
+    // Por enquanto, retornamos dados de demonstração
+    const mockData = {
+      subscribers: Math.floor(Math.random() * 1000) + 100,
+      viewers: Math.floor(Math.random() * 500) + 10,
+      isLive: Math.random() > 0.3
+    };
+
+    res.json(mockData);
+  } catch (error) {
+    console.error('Erro ao obter dados da Twitch:', error);
+    res.status(500).json({ error: 'Erro ao obter dados da Twitch' });
+  }
+});
+
+// Rota para obter configuração da Twitch
+app.get('/api/twitch/config', (req, res) => {
+  // Enviar apenas configurações públicas (sem secrets)
+  const twitchConfig = {
+    enabled: config.twitch?.enabled || false,
+    channelName: config.twitch?.channel_name || '',
+    updateInterval: config.twitch?.update_interval || 60000
+  };
+
+  res.json(twitchConfig);
+});
+
+// Rota para obter URL de autorização da Twitch
+app.get('/api/twitch/auth-url', checkTwitchConfig, (req, res) => {
+  // Gerar estado único para esta sessão
+  const state = crypto.randomBytes(16).toString('hex');
+  const expiresAt = Date.now() + (10 * 60 * 1000); // 10 minutos de validade
+
+  // Armazenar estado para validação posterior
+  authStates.set(state, { expiresAt });
+
+  // Gerar URL de autorização
+  const authUrl = twitchAuth.generateAuthUrl(state);
+
+  res.json({ url: authUrl, state });
+});
+
+// Rota de callback para autorização OAuth da Twitch
+app.get('/auth/twitch/callback', checkTwitchConfig, async (req, res) => {
+  const { code, state, error, error_description } = req.query;
+
+  // Verificar erro
+  if (error) {
+    console.error(`Erro na autenticação Twitch: ${error} - ${error_description}`);
+    return res.send(`
+      <html>
+        <head>
+          <title>Erro de Autenticação</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+            .error { color: #e53935; }
+            .button { display: inline-block; margin-top: 20px; padding: 10px 20px; 
+                     background-color: #6441a5; color: white; text-decoration: none; border-radius: 4px; }
+          </style>
+        </head>
+        <body>
+          <h2>Falha na Autenticação Twitch</h2>
+          <p class="error">${error}: ${error_description}</p>
+          <a class="button" href="/">Voltar ao Início</a>
+        </body>
+      </html>
+    `);
+  }
+
+  // Verificar estado
+  if (!state || !authStates.has(state)) {
+    return res.status(400).send(`
+      <html>
+        <head>
+          <title>Erro de Autenticação</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+            .error { color: #e53935; }
+            .button { display: inline-block; margin-top: 20px; padding: 10px 20px; 
+                     background-color: #6441a5; color: white; text-decoration: none; border-radius: 4px; }
+          </style>
+        </head>
+        <body>
+          <h2>Falha na Autenticação Twitch</h2>
+          <p class="error">Estado de autenticação inválido. Isso pode ser uma tentativa de falsificação.</p>
+          <a class="button" href="/">Voltar ao Início</a>
+        </body>
+      </html>
+    `);
+  }
+
+  // Verificar se o estado expirou
+  const stateData = authStates.get(state);
+  if (stateData.expiresAt < Date.now()) {
+    authStates.delete(state);
+    return res.status(400).send(`
+      <html>
+        <head>
+          <title>Erro de Autenticação</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+            .error { color: #e53935; }
+            .button { display: inline-block; margin-top: 20px; padding: 10px 20px; 
+                     background-color: #6441a5; color: white; text-decoration: none; border-radius: 4px; }
+          </style>
+        </head>
+        <body>
+          <h2>Falha na Autenticação Twitch</h2>
+          <p class="error">O código de autorização expirou. Por favor, tente novamente.</p>
+          <a class="button" href="/">Voltar ao Início</a>
+        </body>
+      </html>
+    `);
+  }
+
+  // Remover estado usado
+  authStates.delete(state);
+
+  try {
+    // Trocar código por tokens
+    const success = await twitchAuth.handleCallback(code, state);
+
+    if (success) {
+      // Atualizar estatísticas imediatamente
+      try {
+        await twitchApi.updateStats();
+      } catch (err) {
+        console.error('Erro ao atualizar estatísticas após autorização:', err);
+      }
+
+      // Retornar página de sucesso
+      return res.send(`
+        <html>
+          <head>
+            <title>Autorização Concluída</title>
+            <style>
+              body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+              .success { color: #43a047; }
+              .button { display: inline-block; margin-top: 20px; padding: 10px 20px; 
+                       background-color: #6441a5; color: white; text-decoration: none; border-radius: 4px; }
+            </style>
+          </head>
+          <body>
+            <h2>Autorização Twitch Concluída</h2>
+            <p class="success">Seu overlay agora está conectado à sua conta da Twitch!</p>
+            <a class="button" href="/">Voltar ao Início</a>
+            <script>
+              // Fechar a janela automaticamente após 5 segundos se for uma janela pop-up
+              setTimeout(() => {
+                if (window.opener) {
+                  window.opener.postMessage('twitch-auth-success', '*');
+                  window.close();
+                }
+              }, 5000);
+            </script>
+          </body>
+        </html>
+      `);
+    } else {
+      return res.status(500).send(`
+        <html>
+          <head>
+            <title>Erro de Autenticação</title>
+            <style>
+              body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+              .error { color: #e53935; }
+              .button { display: inline-block; margin-top: 20px; padding: 10px 20px; 
+                       background-color: #6441a5; color: white; text-decoration: none; border-radius: 4px; }
+            </style>
+          </head>
+          <body>
+            <h2>Falha na Autenticação Twitch</h2>
+            <p class="error">Não foi possível obter os tokens de acesso. Por favor, tente novamente mais tarde.</p>
+            <a class="button" href="/">Voltar ao Início</a>
+          </body>
+        </html>
+      `);
+    }
+  } catch (error) {
+    console.error('Erro ao processar callback da Twitch:', error);
+    return res.status(500).send(`
+      <html>
+        <head>
+          <title>Erro de Autenticação</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+            .error { color: #e53935; }
+            .button { display: inline-block; margin-top: 20px; padding: 10px 20px; 
+                     background-color: #6441a5; color: white; text-decoration: none; border-radius: 4px; }
+          </style>
+        </head>
+        <body>
+          <h2>Falha na Autenticação Twitch</h2>
+          <p class="error">Ocorreu um erro no servidor: ${error.message}</p>
+          <a class="button" href="/">Voltar ao Início</a>
+        </body>
+      </html>
+    `);
+  }
+});
+
+// Rota para verificar status da autenticação Twitch
+app.get('/api/twitch/auth-status', async (req, res) => {
+  try {
+    const isEnabled = !!(config.twitch && config.twitch.enabled);
+    const isConfigured = !!(config.twitch && config.twitch.client_id && config.twitch.client_secret);
+    const isAuthorized = twitchAuth.isAuthorized();
+
+    let validationResult = null;
+
+    if (isAuthorized) {
+      validationResult = await twitchAuth.validateToken();
+    }
+
+    res.json({
+      enabled: isEnabled,
+      configured: isConfigured,
+      authorized: isAuthorized,
+      valid: validationResult ? validationResult.valid : false,
+      channel: config.twitch?.channel_name || '',
+      userName: validationResult ? validationResult.login : null,
+      scopes: validationResult ? validationResult.scopes : []
+    });
+  } catch (error) {
+    console.error('Erro ao obter status de autenticação:', error);
+    res.status(500).json({ error: 'Erro ao verificar status de autenticação da Twitch' });
+  }
+});
+
+// Rota para revogar autorização Twitch
+app.post('/api/twitch/revoke', async (req, res) => {
+  try {
+    const success = await twitchAuth.revokeAccess();
+    res.json({ success });
+  } catch (error) {
+    console.error('Erro ao revogar acesso da Twitch:', error);
+    res.status(500).json({ error: 'Erro ao revogar acesso da Twitch' });
+  }
+});
+
+// Rota para obter estatísticas da Twitch
+app.get('/api/twitch/stats', async (req, res) => {
+  try {
+    // Verificar se a Twitch está habilitada
+    if (!config.twitch || !config.twitch.enabled) {
+      return res.json({ enabled: false });
+    }
+
+    // Verificar se estamos autorizados
+    if (!twitchAuth.isAuthorized()) {
+      return res.json({
+        enabled: true,
+        authorized: false,
+        message: 'Não autorizado na Twitch'
+      });
+    }
+
+    // Se os dados do cache são recentes (menos de 30 segundos), retornar diretamente
+    const stats = twitchApi.getStats();
+    const isCacheRecent = stats.lastUpdated && (Date.now() - stats.lastUpdated < 30000);
+
+    if (isCacheRecent) {
+      return res.json({
+        enabled: true,
+        authorized: true,
+        ...stats
+      });
+    }
+
+    // Caso contrário, atualizar e retornar
+    const updatedStats = await twitchApi.updateStats();
+    res.json({
+      enabled: true,
+      authorized: true,
+      ...updatedStats
+    });
+  } catch (error) {
+    console.error('Erro ao obter estatísticas da Twitch:', error);
+    res.status(500).json({
+      error: 'Erro ao obter estatísticas da Twitch',
+      message: error.message
+    });
+  }
+});
+
+// Adicionar listener para eventos de estatísticas da Twitch
+twitchApi.on('statsUpdated', (stats) => {
+  // Emitir evento para todos os clientes conectados
+  io.emit('twitchStatsUpdated', stats);
 });
 
 // Inicializar rastreador de estatísticas

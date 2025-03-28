@@ -14,6 +14,88 @@
   border: 1px solid var(--border-color);
   position: relative;
 }
+/* Estilos para a seção de estatísticas da Twitch */
+.twitch-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.twitch-status {
+  text-align: center;
+  font-size: 14px;
+  font-style: italic;
+  padding: 8px;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.2);
+  margin-top: 5px;
+}
+
+/* Estados do status da Twitch */
+.twitch-status.online {
+  color: var(--victory-color);
+}
+
+.twitch-status.offline {
+  color: var(--defeat-color);
+}
+
+.twitch-status.error {
+  color: #f44336;
+}
+
+.twitch-status.warning {
+  color: #ff9800;
+}
+
+.twitch-status.success {
+  color: #4caf50;
+}
+
+.twitch-status.disabled {
+  color: #9e9e9e;
+}
+
+/* Botão de autenticação da Twitch */
+.twitch-auth-button {
+  background-color: #9146FF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.twitch-auth-button:hover {
+  background-color: #772ce8;
+}
+
+.twitch-auth-button:active {
+  background-color: #5c16c5;
+}
+
+/* Ícone da Twitch */
+.twitch-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M11.64 5.93H13.07V10.21H11.64M15.57 5.93H17V10.21H15.57M7 2L3.43 5.57V18.43H7.71V22L11.29 18.43H14.14L20.57 12V2M19.14 11.29L16.29 14.14H13.43L10.93 16.64V14.14H7.71V3.43H19.14Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* Estado escondido específico para elementos Twitch */
+.twitch-element-hidden {
+  display: none !important;
+}
 
 /* Faixa de resultados recentes */
 .recent-results-strip {

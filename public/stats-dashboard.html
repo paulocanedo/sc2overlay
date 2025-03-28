@@ -127,7 +127,29 @@
             </div>
           </div>
         </div>
-      </div>
+
+        <!-- Seção Twitch com botão de autenticação -->
+        <div class="stats-section">
+          <h2>Twitch</h2>
+          <div class="twitch-stats" id="twitch-stats-container">
+            <div class="stat-row">
+              <div class="stat-item">
+                <div class="stat-value" id="twitch-subs">--</div>
+                <div class="stat-label">Inscritos</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="twitch-viewers">--</div>
+                <div class="stat-label">Espectadores</div>
+              </div>
+            </div>
+            <div class="twitch-status" id="twitch-status">
+              Aguardando conexão com a Twitch...
+            </div>
+            <button id="twitch-auth-button" class="twitch-auth-button twitch-element-hidden">
+              <i class="twitch-icon"></i> Conectar à Twitch
+            </button>
+          </div>
+        </div>
       
       <div class="panel-footer">
         <div id="current-status">Aguardando conexão com StarCraft II...</div>
@@ -136,5 +158,6 @@
   </div>
 
   <script src="/js/stats-dashboard.js"></script>
+  <script src="/js/twitch-integration.js"></script>
 </body>
 </html>

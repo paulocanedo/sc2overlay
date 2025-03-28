@@ -25,6 +25,19 @@ overlay:
   auto_save: true  # Salvar estatísticas automaticamente
   save_interval: 300000  # Intervalo para salvar estatísticas (5 minutos)
 
+# Configurações da Twitch
+twitch:
+  enabled: false  # Ativar ou desativar a integração com a Twitch
+  channel_name: ""  # Nome do seu canal na Twitch
+  client_id: ""  # Client ID da sua aplicação Twitch
+  client_secret: ""  # Client Secret da sua aplicação Twitch
+  redirect_uri: "http://localhost:3000/auth/twitch/callback"  # URL de redirecionamento OAuth
+  update_interval: 60000  # Intervalo de atualização em ms (1 minuto)
+  # Escopos de autorização necessários
+  # channel:read:subscriptions - Para ler informações de inscritos
+  # channel:read:stream_key - Para verificar se o canal está ao vivo
+  scopes: "channel:read:subscriptions channel:read:stream_key"
+
 # Configurações de armazenamento
 storage:
   stats_file: "./data/stats.json"  # Arquivo para salvar estatísticas
