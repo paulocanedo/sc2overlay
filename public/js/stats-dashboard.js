@@ -32,6 +32,7 @@ const elements = {
 let appState = {
   connected: false,
   inGame: false,
+  inReplay: false,
   currentScreen: 'Unknown',
   config: null,
   recentMatches: []
@@ -243,7 +244,7 @@ socket.on('connect', () => {
   console.log('Conectado ao servidor');
   appState.connected = true;
   updateStatus('online', 'Conectado');
-  
+
   // Carregar configuração e estatísticas iniciais
   loadConfig();
   loadStats();
@@ -259,12 +260,22 @@ socket.on('disconnect', () => {
 socket.on('gameStarted', (data) => {
   console.log('Partida iniciada:', data);
   appState.inGame = true;
-  
+  appState.inReplay = false;
+
   let opponentName = "Desconhecido";
   if (data && data.players && data.players.length >= 1) {
-    opponentName = data.players[0].name;
+    // Se temos o myPlayer identificado, usamos o outro jogador
+    if (data.myPlayer) {
+      const opponent = data.players.find(p => p.name !== data.myPlayer.name);
+      if (opponent) {
+        opponentName = opponent.name;
+      }
+    } else {
+      // Caso contrário, usamos o primeiro jogador
+      opponentName = data.players[0].name;
+    }
   }
-  
+
   updateStatus('ingame', `Em jogo contra ${opponentName}`);
 });
 
@@ -272,20 +283,20 @@ socket.on('gameEnded', (data) => {
   console.log('Partida finalizada:', data);
   appState.inGame = false;
   updateStatus('online', 'Jogo finalizado');
-  
+
   // Se temos informação sobre o jogador, atualizar as informações do último jogo
   if (data && data.myPlayer) {
     const opponent = data.players.find(p => p.name !== data.myPlayer.name);
     if (opponent) {
       const lastGameInfo = {
-        timestamp: new Date().toISOString(),
+        timestamp: data.timestamp,
         myPlayer: data.myPlayer,
         opponent: opponent,
         result: data.myPlayer.result
       };
-      
+
       updateLastGameInfo(lastGameInfo);
-      
+
       // Recarregar partidas recentes
       setTimeout(loadRecentMatches, 1000);
     }
@@ -294,29 +305,39 @@ socket.on('gameEnded', (data) => {
 
 socket.on('replayStarted', (data) => {
   console.log('Replay iniciado:', data);
-  appState.inGame = true;
+  appState.inGame = false;
+  appState.inReplay = true;
   updateStatus('ingame', 'Assistindo replay');
+});
+
+socket.on('replayEnded', (data) => {
+  console.log('Replay finalizado:', data);
+  appState.inReplay = false;
+  updateStatus('online', 'Replay finalizado');
+});
+
+socket.on('screenEntered', (data) => {
+  console.log('Entrando na tela:', data);
+  appState.currentScreen = data.toScreen || 'Unknown';
+  updateStatus('online', `Na tela ${data.toScreen || 'desconhecida'}`);
+});
+
+socket.on('screenExited', (data) => {
+  console.log('Saindo da tela:', data);
 });
 
 socket.on('screenChanged', (data) => {
   if (!data) return;
-  
+
   console.log('Tela alterada:', data);
   appState.currentScreen = data.toScreen || 'Unknown';
-  
-  if (data.toScreen === 'InGame') {
-    appState.inGame = true;
-    updateStatus('ingame', 'Em jogo');
-  } else {
-    appState.inGame = false;
-    updateStatus('online', `Na tela ${data.toScreen || 'desconhecida'}`);
-  }
+  updateStatus('online', `Na tela ${data.toScreen || 'desconhecida'}`);
 });
 
 socket.on('statsUpdated', (stats) => {
   console.log('Estatísticas atualizadas:', stats);
   updateStats(stats);
-  
+
   // Recarregar partidas recentes quando estatísticas forem atualizadas
   loadRecentMatches();
 });

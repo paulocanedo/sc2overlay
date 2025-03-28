@@ -40,7 +40,7 @@ class StatsTracker {
       this.saveStats();
     }
   }
-  
+
   async loadStats() {
     try {
       // Garantir que o diretório existe
@@ -82,7 +82,7 @@ class StatsTracker {
 
     // Se o myPlayer foi identificado explicitamente pelo monitor
     if (gameData.myPlayer) {
-      this.processGameResult(gameData.myPlayer, gameData.players);
+      this.processGameResult(gameData.myPlayer, gameData.players, gameData.timestamp);
       return;
     }
 
@@ -97,7 +97,7 @@ class StatsTracker {
       return;
     }
 
-    this.processGameResult(myPlayer, gameData.players);
+    this.processGameResult(myPlayer, gameData.players, gameData.timestamp);
   }
 
   findMyPlayer(players) {
@@ -127,7 +127,7 @@ class StatsTracker {
     return possibleMatches[0];
   }
 
-  processGameResult(myPlayer, allPlayers) {
+  processGameResult(myPlayer, allPlayers, timestamp) {
     // Encontrar o oponente (qualquer jogador que não seja eu)
     const opponent = allPlayers.find(p => p.name !== myPlayer.name);
 
@@ -161,7 +161,7 @@ class StatsTracker {
 
     // Registrar último jogo
     this.stats.lastGame = {
-      timestamp: new Date().toISOString(),
+      timestamp: timestamp || new Date().toISOString(),
       myPlayer: myPlayer,
       opponent: opponent,
       result: win ? 'Victory' : 'Defeat'

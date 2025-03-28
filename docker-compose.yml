@@ -10,6 +10,7 @@ services:
     volumes:
       # Montar o diretório atual como volume para desenvolvimento
       - .:/app
+      - ./data:/data
       # Excluir node_modules do volume
       - /app/node_modules
     environment:
@@ -24,4 +25,4 @@ services:
     # Reiniciar sempre se o container cair
     restart: unless-stopped
     # Para desenvolvimento, usar o nodemon para atualizar a aplicação quando os arquivos mudarem
-    command: npm run dev
+#    command: npm run dev
