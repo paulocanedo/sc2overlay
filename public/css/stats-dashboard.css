@@ -1,6 +1,6 @@
 @import 'common.css';
 
-/* Layout principal do stats dashboard */
+/* ========== LAYOUT PRINCIPAL ========== */
 .overlay-container {
   width: 350px;
   min-height: 600px;
@@ -14,160 +14,8 @@
   border: 1px solid var(--border-color);
   position: relative;
 }
-/* Estilos para a seção de estatísticas da Twitch */
-.twitch-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
 
-.twitch-status {
-  text-align: center;
-  font-size: 14px;
-  font-style: italic;
-  padding: 8px;
-  border-radius: 5px;
-  background-color: rgba(0, 0, 0, 0.2);
-  margin-top: 5px;
-}
-
-/* Estados do status da Twitch */
-.twitch-status.online {
-  color: var(--victory-color);
-}
-
-.twitch-status.offline {
-  color: var(--defeat-color);
-}
-
-.twitch-status.error {
-  color: #f44336;
-}
-
-.twitch-status.warning {
-  color: #ff9800;
-}
-
-.twitch-status.success {
-  color: #4caf50;
-}
-
-.twitch-status.disabled {
-  color: #9e9e9e;
-}
-
-.twitch-auth-button:hover {
-  background-color: #772ce8;
-}
-
-.twitch-auth-button:active {
-  background-color: #5c16c5;
-}
-
-/* Ícone da Twitch */
-.twitch-icon {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-right: 8px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M11.64 5.93H13.07V10.21H11.64M15.57 5.93H17V10.21H15.57M7 2L3.43 5.57V18.43H7.71V22L11.29 18.43H14.14L20.57 12V2M19.14 11.29L16.29 14.14H13.43L10.93 16.64V14.14H7.71V3.43H19.14Z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-}
-
-/* Estado escondido específico para elementos Twitch */
-.twitch-element-hidden {
-  display: none !important;
-}
-
-/* Faixa de resultados recentes */
-.recent-results-strip {
-  position: static; /* Remover posicionamento absoluto */
-  top: auto;
-  right: auto;
-  width: 100%; /* Ocupar toda a largura */
-  height: auto; /* Altura automática */
-  display: flex;
-  flex-direction: row; /* Mudar para horizontal */
-  justify-content: space-between;
-  padding: 0;
-  margin-bottom: 0; /* Sem espaço entre a faixa e o rodapé */
-  background-color: var(--header-bg); /* Mesma cor do cabeçalho */
-  border-top: 1px solid var(--border-color); /* Adicionar borda no topo */
-}
-
-/* Estilos para a seção Twitch simplificada */
-
-.twitch-stats-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
-  padding: 15px;
-}
-
-.twitch-stat-item {
-  display: flex;
-  align-items: center;
-  color: var(--text-color);
-  font-size: 14px;
-}
-
-.twitch-icon {
-  color: #9146FF;
-  margin-right: 8px;
-  font-size: 16px;
-}
-
-#twitch-subs, #twitch-viewers {
-  font-weight: 700;
-  font-size: 16px;
-  margin-right: 4px;
-}
-
-/* Estilo para o botão de autenticação (mantido do original) */
-.twitch-auth-button {
-  background-color: #9146FF;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 15px;
-  margin-top: 10px;
-  cursor: pointer;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s;
-}
-
-.twitch-auth-button:hover {
-  background-color: #772ce8;
-}
-
-/* Classe para esconder elementos */
-.twitch-element-hidden {
-  display: none !important;
-}
-
-.result-block {
-  flex: 1;
-  height: 4px; /* Altura fixa para os blocos */
-  margin: 0 2px; /* Espaço horizontal entre os blocos */
-  border-radius: 0; /* Remover arredondamento */
-}
-
-.result-block.victory {
-  background-color: var(--victory-color);
-}
-
-.result-block.defeat {
-  background-color: var(--defeat-color);
-}
-
-/* Ajustes específicos do cabeçalho para o dashboard */
+/* ========== CABEÇALHO E RODAPÉ ========== */
 .panel-header h1 {
   font-size: 20px;
 }
@@ -177,7 +25,20 @@
   align-items: center;
 }
 
-/* Container principal de estatísticas */
+.panel-footer {
+  background-color: var(--header-bg);
+  padding: 10px 20px;
+  border-top: 1px solid var(--border-color);
+  font-size: 14px;
+  text-align: center;
+}
+
+#current-status {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* ========== CONTAINER DE ESTATÍSTICAS ========== */
 .stats-container {
   padding: 20px;
 }
@@ -195,182 +56,6 @@
   color: var(--accent-color);
 }
 
-/* Linha de estatísticas */
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-}
-
-.stat-item {
-  text-align: center;
-  flex: 1;
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
-  margin: 0 5px;
-}
-
-.stat-item:first-child {
-  margin-left: 0;
-}
-
-.stat-item:last-child {
-  margin-right: 0;
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 5px;
-}
-
-.stat-label {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-/* Estatísticas de raça */
-.race-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.race-stat {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
-}
-
-.race-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 10px;
-}
-
-/* Remover filtro do ícone no último jogo */
-.last-race-icon img {
-  width: 20px;
-  height: 20px;
-  filter: none;
-}
-
-.race-data {
-  flex: 1;
-}
-
-.race-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.race-name {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.race-record {
-  font-size: 16px;
-  font-weight: 700;
-}
-
-/* Último jogo */
-.last-game {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
-  padding: 15px;
-}
-
-.no-game {
-  text-align: center;
-  font-style: italic;
-  opacity: 0.7;
-}
-
-.game-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.label {
-  font-weight: 700;
-  margin-right: 5px;
-  opacity: 0.8;
-}
-
-/* Último jogo - formato compacto */
-.last-match-compact {
-  display: flex;
-  align-items: center;
-  padding: 5px 0;
-}
-
-.last-race-icon {
-  margin-right: 10px;
-  display: flex;
-  align-items: center;
-}
-
-.last-opponent-name {
-  flex: 1;
-  font-weight: 600;
-  margin-right: 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.last-result-icon {
-  margin-right: 10px;
-}
-
-.last-game-time {
-  font-size: 12px;
-  opacity: 0.8;
-  white-space: nowrap;
-}
-
-/* Rodapé */
-.panel-footer {
-  background-color: var(--header-bg);
-  padding: 10px 20px;
-  border-top: 1px solid var(--border-color);
-  font-size: 14px;
-  text-align: center;
-}
-
-#current-status {
-  font-style: italic;
-  opacity: 0.8;
-}
-
-/* Responsividade */
-@media (max-width: 400px) {
-  .overlay-container {
-    width: 100%;
-  }
-  
-  .stat-value {
-    font-size: 20px;
-  }
-  
-  .panel-header h1 {
-    font-size: 18px;
-  }
-}
-
-/* Estilos para a nova seção de estatísticas gerais */
-
-/* Total de jogos integrado ao título */
 .total-games-count {
   font-size: 12px;
   font-weight: normal;
@@ -378,7 +63,8 @@
   margin-left: 5px;
 }
 
-/* Container para a visão geral de estatísticas */
+/* ========== ESTATÍSTICAS GERAIS ========== */
+/* Contêiner para visão geral */
 .stats-overview {
   display: flex;
   align-items: center;
@@ -387,7 +73,7 @@
   padding: 15px;
 }
 
-/* Estilo para o gráfico circular */
+/* Gráfico circular */
 .win-rate-chart {
   width: 80px;
   height: 80px;
@@ -399,7 +85,6 @@
   overflow: visible;
 }
 
-/* Garantir que o texto da porcentagem fique legível */
 .win-rate-chart text {
   font-family: 'Roboto', sans-serif;
 }
@@ -438,13 +123,277 @@
   background-color: var(--defeat-color);
 }
 
+/* Linha de estatísticas original (mantido para compatibilidade) */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.stat-item {
+  text-align: center;
+  flex: 1;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  margin: 0 5px;
+}
+
+.stat-item:first-child {
+  margin-left: 0;
+}
+
+.stat-item:last-child {
+  margin-right: 0;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.win-loss-stats .stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
 .stat-label {
   font-size: 14px;
   opacity: 0.8;
 }
 
-/* Melhorias para os valores de estatísticas */
-.win-loss-stats .stat-value {
-  font-size: 22px;
+/* ========== ESTATÍSTICAS POR RAÇA ========== */
+.race-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.race-stat {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+.race-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.race-data {
+  flex: 1;
+}
+
+.race-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.race-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.race-record {
+  font-size: 16px;
   font-weight: 700;
+}
+
+/* ========== ÚLTIMO JOGO ========== */
+.last-game {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  padding: 15px;
+}
+
+.no-game {
+  text-align: center;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.game-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Formato compacto para último jogo */
+.last-match-compact {
+  display: flex;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.last-race-icon {
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.last-race-icon img {
+  width: 20px;
+  height: 20px;
+  filter: none;
+}
+
+.last-opponent-name {
+  flex: 1;
+  font-weight: 600;
+  margin-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.last-result-icon {
+  margin-right: 10px;
+}
+
+.last-game-time {
+  font-size: 12px;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.label {
+  font-weight: 700;
+  margin-right: 5px;
+  opacity: 0.8;
+}
+
+/* ========== RESULTADOS RECENTES ========== */
+.recent-results-strip {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0;
+  margin-bottom: 0;
+  background-color: var(--header-bg);
+  border-top: 1px solid var(--border-color);
+}
+
+.result-block {
+  flex: 1;
+  height: 4px;
+  margin: 0 2px;
+  border-radius: 0;
+}
+
+.result-block.victory {
+  background-color: var(--victory-color);
+}
+
+.result-block.defeat {
+  background-color: var(--defeat-color);
+}
+
+/* ========== INTEGRAÇÃO TWITCH ========== */
+.twitch-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Linha de estatísticas da Twitch */
+.twitch-stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  padding: 15px;
+}
+
+.twitch-stat-item {
+  display: flex;
+  align-items: center;
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.twitch-icon {
+  color: #9146FF;
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+#twitch-subs, #twitch-viewers {
+  font-weight: 700;
+  font-size: 16px;
+  margin-right: 4px;
+}
+
+/* Botão de autenticação */
+.twitch-auth-button {
+  background-color: #9146FF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.twitch-auth-button:hover {
+  background-color: #772ce8;
+}
+
+.twitch-auth-button:active {
+  background-color: #5c16c5;
+}
+
+/* Status da Twitch (mantido para compatibilidade) */
+.twitch-status {
+  text-align: center;
+  font-size: 14px;
+  font-style: italic;
+  padding: 8px;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.2);
+  margin-top: 5px;
+}
+
+/* Estados de status (mantidos para compatibilidade) */
+.twitch-status.online { color: var(--victory-color); }
+.twitch-status.offline { color: var(--defeat-color); }
+.twitch-status.error { color: #f44336; }
+.twitch-status.warning { color: #ff9800; }
+.twitch-status.success { color: #4caf50; }
+.twitch-status.disabled { color: #9e9e9e; }
+
+/* ========== CLASSES UTILITÁRIAS ========== */
+.twitch-element-hidden,
+.sc2-hidden {
+  display: none !important;
+}
+
+/* ========== RESPONSIVIDADE ========== */
+@media (max-width: 400px) {
+  .overlay-container {
+    width: 100%;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .panel-header h1 {
+    font-size: 18px;
+  }
 }
