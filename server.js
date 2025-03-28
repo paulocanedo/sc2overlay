@@ -206,6 +206,7 @@ sc2Monitor.on('gameEnded', (data) => {
         opponentRace: opponent.race,
         result: data.myPlayer.result,
         isReplay: false,
+        timestamp: data.timestamp,
         rawData: JSON.stringify(data)
       }).then(id => {
         if (id) {
@@ -225,6 +226,21 @@ sc2Monitor.on('gameEnded', (data) => {
 sc2Monitor.on('replayStarted', (data) => {
   console.log('Replay iniciado:', data);
   io.emit('replayStarted', data);
+});
+
+sc2Monitor.on('replayEnded', (data) => {
+  console.log('Replay finalizado:', data);
+  io.emit('replayEnded', data);
+});
+
+sc2Monitor.on('screenEntered', (data) => {
+  console.log(`Entrando na tela: ${data.toScreen}`);
+  io.emit('screenEntered', data);
+});
+
+sc2Monitor.on('screenExited', (data) => {
+  console.log(`Saindo da tela: ${data.fromScreen}`);
+  io.emit('screenExited', data);
 });
 
 sc2Monitor.on('screenChanged', (data) => {

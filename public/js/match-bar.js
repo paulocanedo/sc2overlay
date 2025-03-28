@@ -14,7 +14,7 @@ const elements = {
 let appState = {
   connected: false,
   inGame: false,
-  isReplay: false,
+  inReplay: false,
   currentGame: null,
   config: null,
   playerId: null
@@ -117,26 +117,35 @@ function updateVisibility(isVisible) {
 socket.on('connect', () => {
   console.log('Conectado ao servidor');
   appState.connected = true;
-  
+
   // Carregar configuração
   loadConfig();
-  
+
   // Verificar estado do jogo atual
   fetch('/api/game')
-    .then(response => response.json())
-    .then(gameData => {
-      if (gameData && (gameData.players?.length > 0)) {
-        appState.currentGame = gameData;
-        appState.inGame = true;
-        updateMatchInterface(gameData);
-        updateVisibility(true);
-      } else {
-        updateVisibility(false);
-      }
-    })
-    .catch(error => {
-      console.error('Erro ao obter estado do jogo:', error);
-    });
+      .then(response => response.json())
+      .then(gameData => {
+        if (gameData && (gameData.players?.length > 0)) {
+          appState.currentGame = gameData;
+          updateMatchInterface(gameData);
+
+          // Determinar estado com base nos dados do jogo
+          if (gameData.isReplay) {
+            appState.inReplay = true;
+            appState.inGame = false;
+          } else {
+            appState.inGame = true;
+            appState.inReplay = false;
+          }
+
+          updateVisibility(true);
+        } else {
+          updateVisibility(false);
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao obter estado do jogo:', error);
+      });
 });
 
 socket.on('disconnect', () => {
@@ -147,6 +156,7 @@ socket.on('disconnect', () => {
 socket.on('gameStarted', (data) => {
   console.log('Partida iniciada:', data);
   appState.inGame = true;
+  appState.inReplay = false;
   appState.currentGame = data;
   updateMatchInterface(data);
   updateVisibility(true);
@@ -154,34 +164,42 @@ socket.on('gameStarted', (data) => {
 
 socket.on('gameEnded', (data) => {
   console.log('Partida finalizada:', data);
+  appState.inGame = false;
   // Mantenha os dados para mostrar o resultado, mas esconda após alguns segundos
   setTimeout(() => {
-    appState.inGame = false;
     updateVisibility(false);
   }, 5000);
 });
 
 socket.on('replayStarted', (data) => {
   console.log('Replay iniciado:', data);
-  appState.inGame = true;
+  appState.inGame = false;
+  appState.inReplay = true;
   appState.currentGame = data;
   updateMatchInterface(data);
   updateVisibility(true);
 });
 
-socket.on('screenChanged', (data) => {
-  console.log('Tela alterada:', data);
-  
-  if (data.toScreen === 'InGame') {
-    appState.inGame = true;
-    updateVisibility(true);
-  } else {
-    // Se não estiver no jogo, esconda a barra após um pequeno atraso
-    setTimeout(() => {
-      appState.inGame = false;
-      updateVisibility(false);
-    }, 1000);
+socket.on('replayEnded', (data) => {
+  console.log('Replay finalizado:', data);
+  appState.inReplay = false;
+  // Esconder a barra após um pequeno atraso
+  setTimeout(() => {
+    updateVisibility(false);
+  }, 2000);
+});
+
+socket.on('screenEntered', (data) => {
+  console.log('Entrando na tela:', data);
+
+  // Se não estiver em jogo ou replay, esconda a barra
+  if (!appState.inGame && !appState.inReplay) {
+    updateVisibility(false);
   }
+});
+
+socket.on('screenExited', (data) => {
+  console.log('Saindo da tela:', data);
 });
 
 // Inicialização

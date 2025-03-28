@@ -1,6 +1,13 @@
 const axios = require('axios');
 const EventEmitter = require('./eventEmitter');
 
+// Estados possíveis da aplicação
+const AppState = {
+  IN_MENUS: 'IN_MENUS',       // Em alguma tela/menu
+  IN_GAME: 'IN_GAME',         // Jogando uma partida
+  IN_REPLAY: 'IN_REPLAY'      // Assistindo um replay
+};
+
 class SC2Monitor {
   constructor(config) {
     this.config = config;
@@ -22,17 +29,12 @@ class SC2Monitor {
     this.exactMatch = config.player.exact_match !== false;
     this.events = new EventEmitter();
 
-    // Estado atual
+    // Estado atual da aplicação
+    this.currentState = AppState.IN_MENUS;
     this.currentScreen = [];
     this.currentGame = null;
-    this.isInGame = false;
-    this.lastGameState = null;
     this.isConnected = false;
-
-    // Controle para evitar duplicação de eventos de fim de jogo
-    this.screenChangedSinceLastGameEnd = true;
-    this.lastGameEndTimestamp = 0;
-    this.gameEndProcessed = false;
+    this.lastGameState = null;
 
     // Iniciar monitoramento
     this.startMonitoring();
@@ -71,6 +73,10 @@ class SC2Monitor {
       const uiResponse = await axios.get(`${this.apiUrl}/ui`);
       const activeScreens = uiResponse.data.activeScreens || [];
 
+      // Verificar estado do jogo
+      const gameResponse = await axios.get(`${this.apiUrl}/game`);
+      const gameState = gameResponse.data;
+
       // Atualizar estado de conexão
       const wasConnected = this.isConnected;
       this.isConnected = true;
@@ -80,64 +86,12 @@ class SC2Monitor {
         this.events.emit('sc2Connected');
       }
 
-      // Detectar mudança de tela
-      if (JSON.stringify(activeScreens) !== JSON.stringify(this.currentScreen)) {
-        const oldScreen = [...this.currentScreen];
-        this.currentScreen = activeScreens;
-
-        // Marcar que houve mudança de tela desde o último fim de jogo
-        this.screenChangedSinceLastGameEnd = true;
-
-        this.events.emit('screenChanged', {
-          fromScreen: this.getScreenName(oldScreen),
-          toScreen: this.getScreenName(activeScreens)
-        });
-      }
-
-      // Verificar se está em jogo (telas vazias = em jogo)
-      const wasInGame = this.isInGame;
-      this.isInGame = activeScreens.length === 0;
-
-      // Verificar estado do jogo
-      const gameResponse = await axios.get(`${this.apiUrl}/game`);
-      const gameState = gameResponse.data;
-
-      // Se entrou em um jogo
-      if (this.isInGame && !wasInGame) {
-        this.handleGameStart(gameState);
-        // Resetar o controle de fim de jogo quando um novo jogo inicia
-        this.gameEndProcessed = false;
-      }
-
-      // Se saiu de um jogo
-      if (!this.isInGame && wasInGame) {
-        // Verificar se houve mudança de tela desde o último fim de jogo
-        // E se já passou tempo suficiente desde o último evento (para evitar duplicatas)
-        const now = Date.now();
-        const timeSinceLastEnd = now - this.lastGameEndTimestamp;
-
-        if (this.screenChangedSinceLastGameEnd &&
-            timeSinceLastEnd > 2000 &&
-            !this.gameEndProcessed) {
-
-          // Verificar se o resultado não é "Undecided"
-          const allResultsDecided = this.areAllResultsDecided(gameState);
-
-          if (allResultsDecided) {
-            this.handleGameEnd(gameState);
-
-            // Atualizar controles
-            this.screenChangedSinceLastGameEnd = false;
-            this.lastGameEndTimestamp = now;
-            this.gameEndProcessed = true;
-          } else {
-            console.log('Jogo terminado com resultados ainda não decididos. Aguardando resultado final.');
-          }
-        }
-      }
+      // Lógica da máquina de estados
+      await this.updateState(activeScreens, gameState);
 
       // Atualizar estado do jogo atual
       this.currentGame = gameState;
+      this.currentScreen = activeScreens;
 
     } catch (error) {
       console.error('Erro ao verificar estado do SC2:', error.message);
@@ -151,19 +105,150 @@ class SC2Monitor {
     }
   }
 
+  async updateState(activeScreens, gameState) {
+    const isInGameUI = activeScreens.length === 0;
+    const isReplay = gameState.isReplay || false;
+    const prevState = this.currentState;
+
+    let newState;
+
+    // Determinar o novo estado
+    if (isInGameUI) {
+      // Verificar se é um replay ou uma partida válida
+      if (isReplay) {
+        newState = AppState.IN_REPLAY;
+      } else if (this.isValid1v1Match(gameState)) {
+        newState = AppState.IN_GAME;
+      } else {
+        // Se não for nem replay nem partida 1v1 válida, consideramos como estando nos menus
+        // para não processar outros tipos de jogos (vs IA, etc)
+        console.log('Detectado jogo que não é 1v1 entre jogadores humanos. Ignorando.');
+        newState = AppState.IN_MENUS;
+      }
+    } else {
+      newState = AppState.IN_MENUS;
+    }
+
+    // Verificar mudanças de estado e emitir eventos adequados
+    if (prevState !== newState) {
+      console.log(`Mudança de estado: ${prevState} -> ${newState}`);
+
+      // Eventos de saída do estado anterior
+      switch (prevState) {
+        case AppState.IN_GAME:
+          if (this.areAllResultsDecided(gameState)) {
+            console.log('Detectado fim de partida');
+            this.handleGameEnd(gameState);
+          }
+          break;
+
+        case AppState.IN_REPLAY:
+          if (newState === AppState.IN_MENUS) {
+            console.log('Detectado fim de replay');
+            this.events.emit('replayEnded', {
+              timestamp: new Date().toISOString()
+            });
+          }
+          break;
+
+        case AppState.IN_MENUS:
+          console.log('Saindo dos menus');
+          this.events.emit('screenExited', {
+            fromScreen: this.getScreenName(this.currentScreen),
+            timestamp: new Date().toISOString()
+          });
+          break;
+      }
+
+      // Eventos de entrada no novo estado
+      switch (newState) {
+        case AppState.IN_GAME:
+          console.log('Detectado início de partida 1v1');
+          this.handleGameStart(gameState);
+          break;
+
+        case AppState.IN_REPLAY:
+          console.log('Detectado início de replay');
+          this.events.emit('replayStarted', {
+            players: gameState.players.filter(player => player.type === 'user').map(this.formatPlayer),
+            isReplay: true,
+            timestamp: new Date().toISOString()
+          });
+          break;
+
+        case AppState.IN_MENUS:
+          console.log('Entrando nos menus');
+          this.events.emit('screenEntered', {
+            toScreen: this.getScreenName(activeScreens),
+            timestamp: new Date().toISOString()
+          });
+          break;
+      }
+
+      // Verificar mudança de tela dentro do estado de menus
+      if (prevState === AppState.IN_MENUS && newState === AppState.IN_MENUS &&
+          JSON.stringify(this.currentScreen) !== JSON.stringify(activeScreens)) {
+        this.events.emit('screenChanged', {
+          fromScreen: this.getScreenName(this.currentScreen),
+          toScreen: this.getScreenName(activeScreens),
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      // Atualizar estado atual
+      this.currentState = newState;
+    }
+    // Se não houve mudança de estado, verificar outras condições específicas
+    else if (newState === AppState.IN_GAME) {
+      // Verificar se o jogo terminou enquanto ainda está na tela do jogo
+      if (this.lastGameState &&
+          !this.areAllResultsDecided(this.lastGameState) &&
+          this.areAllResultsDecided(gameState)) {
+        console.log('Detectado fim de partida enquanto ainda na tela do jogo');
+        this.handleGameEnd(gameState);
+      }
+    }
+    // Verificar mudança de tela dentro do estado de menus
+    else if (newState === AppState.IN_MENUS &&
+        JSON.stringify(this.currentScreen) !== JSON.stringify(activeScreens)) {
+      this.events.emit('screenChanged', {
+        fromScreen: this.getScreenName(this.currentScreen),
+        toScreen: this.getScreenName(activeScreens),
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Salvar o estado do jogo para a próxima comparação
+    this.lastGameState = { ...gameState };
+  }
+
+  // Verifica se é uma partida 1v1 válida (exatamente 2 jogadores humanos, sem IA)
+  isValid1v1Match(gameState) {
+    if (!gameState || !gameState.players) {
+      return false;
+    }
+
+    // Filtrar jogadores por tipo
+    const users = gameState.players.filter(player => player.type === 'user');
+    const computers = gameState.players.filter(player => player.type === 'computer');
+
+    // Verificar se temos exatamente 2 jogadores humanos e nenhuma IA
+    return users.length === 2 && computers.length === 0;
+  }
+
   // Verificar se todos os resultados dos jogadores estão decididos
   areAllResultsDecided(gameState) {
     if (!gameState || !gameState.players || gameState.players.length === 0) {
       return false;
     }
 
-    // Verificar apenas jogadores do tipo 'user' (não verificar IA)
-    const users = gameState.players.filter(player => player.type === 'user');
-
-    // Se não houver usuários, não pode haver resultados para verificar
-    if (users.length === 0) {
+    // Verificar se é uma partida 1v1 válida
+    if (!this.isValid1v1Match(gameState)) {
       return false;
     }
+
+    // Verificar apenas jogadores do tipo 'user' (não verificar IA)
+    const users = gameState.players.filter(player => player.type === 'user');
 
     // Verificar se todos os usuários têm resultados definidos que não são "Undecided"
     return users.every(player =>
@@ -174,50 +259,40 @@ class SC2Monitor {
   }
 
   handleGameStart(gameState) {
-    if (gameState.isReplay) {
-      console.log('Detectado início de replay');
-
-      // Encontrar jogadores do tipo "user"
-      const users = gameState.players.filter(player => player.type === 'user');
-
-      this.events.emit('replayStarted', {
-        players: users.map(this.formatPlayer),
-        isReplay: true
-      });
-    } else {
-      console.log('Detectado início de partida');
-      console.log('Jogadores:', gameState.players.map(p => `${p.name} (${p.race})`).join(', '));
-
-      // Encontrar jogadores do tipo "user"
-      const users = gameState.players.filter(player => player.type === 'user');
-
-      // Identificar meu jogador
-      const myPlayer = this.findMyPlayer(users);
-
-      if (myPlayer) {
-        console.log(`Identificado como jogador: ${myPlayer.name}`);
-      } else {
-        console.warn(`ATENÇÃO: Não foi possível identificar você entre os jogadores!`);
-        console.warn(`Verifique se o nome "${this.playerName}" no arquivo config.yaml corresponde ao seu nome no jogo.`);
-      }
-
-      this.events.emit('gameStarted', {
-        players: users.map(this.formatPlayer),
-        myPlayer: myPlayer ? this.formatPlayer(myPlayer) : null,
-        isReplay: false
-      });
-    }
-
-    this.lastGameState = { ...gameState };
-  }
-
-  handleGameEnd(gameState) {
-    // Só disparar evento de fim de jogo se não for replay
-    if (!this.lastGameState || this.lastGameState.isReplay) {
+    // Verificar se é uma partida 1v1 válida
+    if (!this.isValid1v1Match(gameState)) {
+      console.log('Jogo ignorado: não é uma partida 1v1 entre jogadores humanos');
       return;
     }
 
-    console.log('Detectado fim de partida');
+    // Encontrar jogadores do tipo "user"
+    const users = gameState.players.filter(player => player.type === 'user');
+
+    // Identificar meu jogador
+    const myPlayer = this.findMyPlayer(users);
+
+    if (myPlayer) {
+      console.log(`Identificado como jogador: ${myPlayer.name}`);
+    } else {
+      console.warn(`ATENÇÃO: Não foi possível identificar você entre os jogadores!`);
+      console.warn(`Verifique se o nome "${this.playerName}" no arquivo config.yaml corresponde ao seu nome no jogo.`);
+    }
+
+    this.events.emit('gameStarted', {
+      players: users.map(this.formatPlayer),
+      myPlayer: myPlayer ? this.formatPlayer(myPlayer) : null,
+      isReplay: false,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  handleGameEnd(gameState) {
+    // Verificar se é uma partida 1v1 válida
+    if (!this.isValid1v1Match(gameState)) {
+      console.log('Fim de jogo ignorado: não é uma partida 1v1 entre jogadores humanos');
+      return;
+    }
+
     console.log('Estado final do jogo:', JSON.stringify(gameState, null, 2));
 
     // Encontrar jogadores do tipo "user"
@@ -235,7 +310,8 @@ class SC2Monitor {
 
     this.events.emit('gameEnded', {
       players: users.map(this.formatPlayer),
-      myPlayer: myPlayer ? this.formatPlayer(myPlayer) : null
+      myPlayer: myPlayer ? this.formatPlayer(myPlayer) : null,
+      timestamp: new Date().toISOString()
     });
   }
 
