@@ -165,25 +165,42 @@
           </div>
         </div>
 
-        <!-- Seção Twitch simplificada -->
-        <div class="stats-section">
-          <h2>Twitch</h2>
-          <div class="twitch-stats" id="twitch-stats-container">
-            <!-- Estatísticas em uma única linha -->
-            <div class="twitch-stats-row">
-              <div class="twitch-stat-item">
-                <i class="fas fa-star twitch-icon"></i>
-                <span id="twitch-subs">--</span> inscritos
+        <!-- Seção com acento lateral (pode ser usada para Twitch ou outros conteúdos) -->
+        <div class="stats-section accent-section">
+          <div class="accent-container" id="custom-text-container">
+            <!-- Conteúdo com acento lateral -->
+            <div class="accent-content-row">
+              <div class="accent-border accent-border-blue"></div>
+              <div class="accent-content">
+                <div class="accent-item">
+                  <i class="fas fa-exclamation blue-icon"></i>
+                  <span id="custom-text">apoia</span>
+                </div>
               </div>
-              <div class="twitch-stat-item">
-                <i class="fas fa-eye twitch-icon"></i>
-                <span id="twitch-viewers">--</span> espectadores
+            </div>
+          </div>
+        </div>
+        <div class="stats-section accent-section">
+          <div class="accent-container" id="twitch-stats-container">
+            <!-- Conteúdo com acento lateral -->
+            <div class="accent-content-row">
+              <div class="accent-border accent-border-purple"></div>
+              <div class="accent-content">
+                <!-- Exemplo: Conteúdo Twitch -->
+                <div class="accent-item">
+                  <i class="fas fa-star accent-icon purple-icon"></i>
+                  <span id="twitch-subs">--</span> inscritos
+                </div>
+                <div class="accent-item">
+                  <i class="fas fa-eye accent-icon purple-icon"></i>
+                  <span id="twitch-viewers">--</span> espectadores
+                </div>
               </div>
             </div>
 
-            <!-- Botão de autenticação (mantido, mas escondido por padrão) -->
-            <button id="twitch-auth-button" class="twitch-auth-button twitch-element-hidden">
-              <i class="twitch-icon"></i> Conectar à Twitch
+            <!-- Botão opcional (escondido por padrão) -->
+            <button id="twitch-auth-button" class="accent-button purple-button hidden-element">
+              <i class="accent-icon"></i> Conectar
             </button>
           </div>
         </div>

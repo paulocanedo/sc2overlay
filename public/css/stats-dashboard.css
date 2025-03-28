@@ -298,46 +298,105 @@
   background-color: var(--defeat-color);
 }
 
-/* ========== INTEGRAÇÃO TWITCH ========== */
-.twitch-stats {
+/* Estilos genéricos para seções com acento lateral */
+
+/* Seção principal */
+.accent-section {
+  margin-bottom: 20px;
+}
+
+/* Oculta o título da seção */
+.accent-section h2 {
+  display: none;
+}
+
+/* Container para conteúdos com acento */
+.accent-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* Linha de estatísticas da Twitch */
-.twitch-stats-row {
+/* Linha de conteúdo com acento lateral */
+.accent-content-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 5px;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* Faixa lateral de acento */
+.accent-border {
+  width: 6px;
+  flex-shrink: 0;
+}
+
+/* Variações de cores para a faixa de acento */
+.accent-border-purple {
+  background-color: #9146FF; /* Cor da Twitch */
+}
+
+.accent-border-blue {
+  background-color: var(--accent-color); /* Azul padrão */
+}
+
+.accent-border-green {
+  background-color: var(--victory-color); /* Verde */
+}
+
+.accent-border-red {
+  background-color: var(--defeat-color); /* Vermelho */
+}
+
+/* Conteúdo principal */
+.accent-content {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
   padding: 15px;
 }
 
-.twitch-stat-item {
+/* Itens dentro do conteúdo */
+.accent-item {
   display: flex;
   align-items: center;
   color: var(--text-color);
   font-size: 14px;
 }
 
-.twitch-icon {
-  color: #9146FF;
+/* Ícones em geral */
+.accent-icon {
   margin-right: 8px;
   font-size: 16px;
 }
 
-#twitch-subs, #twitch-viewers {
+/* Variações de cor para ícones */
+.purple-icon {
+  color: #9146FF;
+}
+
+.blue-icon {
+  color: var(--accent-color);
+}
+
+.green-icon {
+  color: var(--victory-color);
+}
+
+.red-icon {
+  color: var(--defeat-color);
+}
+
+/* Valores em negrito */
+.accent-item span[id] {
   font-weight: 700;
   font-size: 16px;
   margin-right: 4px;
 }
 
-/* Botão de autenticação */
-.twitch-auth-button {
-  background-color: #9146FF;
-  color: white;
+/* Botão genérico */
+.accent-button {
   border: none;
   border-radius: 5px;
   padding: 10px 15px;
@@ -350,35 +409,31 @@
   transition: background-color 0.3s;
 }
 
-.twitch-auth-button:hover {
+/* Variações de cor para botões */
+.purple-button {
+  background-color: #9146FF;
+  color: white;
+}
+
+.purple-button:hover {
   background-color: #772ce8;
 }
 
-.twitch-auth-button:active {
-  background-color: #5c16c5;
+.blue-button {
+  background-color: var(--accent-color);
+  color: white;
 }
 
-/* Status da Twitch (mantido para compatibilidade) */
-.twitch-status {
-  text-align: center;
-  font-size: 14px;
-  font-style: italic;
-  padding: 8px;
-  border-radius: 5px;
-  background-color: rgba(0, 0, 0, 0.2);
-  margin-top: 5px;
+.blue-button:hover {
+  background-color: #0096e0;
 }
 
-/* Estados de status (mantidos para compatibilidade) */
-.twitch-status.online { color: var(--victory-color); }
-.twitch-status.offline { color: var(--defeat-color); }
-.twitch-status.error { color: #f44336; }
-.twitch-status.warning { color: #ff9800; }
-.twitch-status.success { color: #4caf50; }
-.twitch-status.disabled { color: #9e9e9e; }
+/* Classe para esconder elementos */
+.hidden-element {
+  display: none !important;
+}
 
 /* ========== CLASSES UTILITÁRIAS ========== */
-.twitch-element-hidden,
 .sc2-hidden {
   display: none !important;
 }
