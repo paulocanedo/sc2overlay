@@ -165,23 +165,23 @@
           </div>
         </div>
 
-        <!-- Seção Twitch com botão de autenticação -->
+        <!-- Seção Twitch simplificada -->
         <div class="stats-section">
           <h2>Twitch</h2>
           <div class="twitch-stats" id="twitch-stats-container">
-            <div class="stat-row">
-              <div class="stat-item">
-                <div class="stat-value" id="twitch-subs">--</div>
-                <div class="stat-label">Inscritos</div>
+            <!-- Estatísticas em uma única linha -->
+            <div class="twitch-stats-row">
+              <div class="twitch-stat-item">
+                <i class="fas fa-star twitch-icon"></i>
+                <span id="twitch-subs">--</span> inscritos
               </div>
-              <div class="stat-item">
-                <div class="stat-value" id="twitch-viewers">--</div>
-                <div class="stat-label">Espectadores</div>
+              <div class="twitch-stat-item">
+                <i class="fas fa-eye twitch-icon"></i>
+                <span id="twitch-viewers">--</span> espectadores
               </div>
             </div>
-            <div class="twitch-status" id="twitch-status">
-              Aguardando conexão com a Twitch...
-            </div>
+
+            <!-- Botão de autenticação (mantido, mas escondido por padrão) -->
             <button id="twitch-auth-button" class="twitch-auth-button twitch-element-hidden">
               <i class="twitch-icon"></i> Conectar à Twitch
             </button>

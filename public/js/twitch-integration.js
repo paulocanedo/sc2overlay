@@ -5,7 +5,6 @@ class TwitchIntegration {
         this.elements = {
             subscriberCount: document.getElementById('twitch-subs'),
             viewerCount: document.getElementById('twitch-viewers'),
-            status: document.getElementById('twitch-status'),
             container: document.getElementById('twitch-stats-container'),
             authButton: document.getElementById('twitch-auth-button')
         };
@@ -13,7 +12,6 @@ class TwitchIntegration {
         this.stats = {
             subscribers: 0,
             viewers: 0,
-            isLive: false,
             lastUpdated: 0
         };
 
@@ -63,21 +61,11 @@ class TwitchIntegration {
 
             console.log('Status da autenticação Twitch:', this.authStatus);
 
-            // Atualizar status baseado na autenticação
-            if (!this.authStatus.enabled) {
-                this.updateStatus('Integração com Twitch desabilitada', 'disabled');
-            } else if (!this.authStatus.configured) {
-                this.updateStatus('Twitch não configurada', 'error');
-            } else if (!this.authStatus.authorized) {
-                this.updateStatus('Autenticação necessária', 'warning');
-                // Mostrar botão de autenticação se houver
-                if (this.elements.authButton) {
+            // Apenas mostramos ou escondemos o botão de autenticação baseado no status
+            if (this.elements.authButton) {
+                if (!this.authStatus.authorized) {
                     this.elements.authButton.classList.remove('twitch-element-hidden');
-                }
-            } else {
-                this.updateStatus(`Conectado como ${this.authStatus.userName}`, 'success');
-                // Esconder botão de autenticação se houver
-                if (this.elements.authButton) {
+                } else {
                     this.elements.authButton.classList.add('twitch-element-hidden');
                 }
             }
@@ -85,7 +73,6 @@ class TwitchIntegration {
             return this.authStatus;
         } catch (error) {
             console.error('Erro ao verificar status de autenticação Twitch:', error);
-            this.updateStatus('Erro ao verificar autenticação', 'error');
             return { enabled: false, configured: false, authorized: false };
         }
     }
@@ -209,13 +196,6 @@ class TwitchIntegration {
 
         if (this.elements.viewerCount) {
             this.elements.viewerCount.textContent = this.formatNumber(this.stats.viewers);
-        }
-
-        // Atualizar status
-        if (this.stats.isLive) {
-            this.updateStatus('Canal Online', 'online');
-        } else {
-            this.updateStatus('Canal Offline', 'offline');
         }
     }
 
