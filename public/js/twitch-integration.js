@@ -5,8 +5,7 @@ class TwitchIntegration {
         this.elements = {
             subscriberCount: document.getElementById('twitch-subs'),
             viewerCount: document.getElementById('twitch-viewers'),
-            container: document.getElementById('twitch-stats-container'),
-            authButton: document.getElementById('twitch-auth-button')
+            container: document.getElementById('twitch-stats-container')
         };
 
         this.stats = {
@@ -30,11 +29,6 @@ class TwitchIntegration {
         try {
             // Verificar status da autenticação
             await this.checkAuthStatus();
-
-            // Se o botão de autenticação estiver presente, configurar evento de clique
-            if (this.elements.authButton) {
-                this.elements.authButton.addEventListener('click', () => this.authenticate());
-            }
 
             // Carregar estatísticas iniciais
             if (this.authStatus.authorized) {
@@ -60,77 +54,10 @@ class TwitchIntegration {
             this.authStatus = await response.json();
 
             console.log('Status da autenticação Twitch:', this.authStatus);
-
-            // Apenas mostramos ou escondemos o botão de autenticação baseado no status
-            if (this.elements.authButton) {
-                if (!this.authStatus.authorized) {
-                    this.elements.authButton.classList.remove('twitch-element-hidden');
-                } else {
-                    this.elements.authButton.classList.add('twitch-element-hidden');
-                }
-            }
-
             return this.authStatus;
         } catch (error) {
             console.error('Erro ao verificar status de autenticação Twitch:', error);
             return { enabled: false, configured: false, authorized: false };
-        }
-    }
-
-    async authenticate() {
-        try {
-            const response = await fetch('/api/twitch/auth-url');
-            const data = await response.json();
-
-            if (data.url) {
-                // Abrir em uma nova janela
-                const authWindow = window.open(
-                    data.url,
-                    'TwitchAuth',
-                    'width=600,height=700,resizable=yes,scrollbars=yes,status=yes'
-                );
-
-                // Escutar mensagem de sucesso
-                window.addEventListener('message', async (event) => {
-                    if (event.data === 'twitch-auth-success') {
-                        // Atualizar status
-                        await this.checkAuthStatus();
-
-                        // Buscar estatísticas
-                        await this.fetchStats();
-                    }
-                }, { once: true });
-
-                // Verificar se a janela foi bloqueada pelo navegador
-                if (!authWindow || authWindow.closed || typeof authWindow.closed === 'undefined') {
-                    alert('O bloqueador de pop-ups impediu a abertura da janela de autenticação. Por favor, desabilite-o para este site e tente novamente.');
-                }
-            } else {
-                console.error('URL de autenticação inválida:', data);
-                this.updateStatus('Erro ao iniciar autenticação', 'error');
-            }
-        } catch (error) {
-            console.error('Erro ao obter URL de autenticação:', error);
-            this.updateStatus('Erro ao iniciar autenticação', 'error');
-        }
-    }
-
-    async revokeAuth() {
-        try {
-            const response = await fetch('/api/twitch/revoke', {
-                method: 'POST'
-            });
-            const data = await response.json();
-
-            if (data.success) {
-                await this.checkAuthStatus();
-                this.updateStatus('Autenticação revogada', 'warning');
-            } else {
-                this.updateStatus('Erro ao revogar autenticação', 'error');
-            }
-        } catch (error) {
-            console.error('Erro ao revogar autenticação:', error);
-            this.updateStatus('Erro ao revogar autenticação', 'error');
         }
     }
 
@@ -189,7 +116,7 @@ class TwitchIntegration {
     }
 
     updateUI() {
-        // Atualizar contadores
+        // Atualizar contadores, se os elementos existirem
         if (this.elements.subscriberCount) {
             this.elements.subscriberCount.textContent = this.formatNumber(this.stats.subscribers);
         }
