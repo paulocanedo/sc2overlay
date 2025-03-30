@@ -162,7 +162,8 @@ function replaceVariables(text) {
   // Substituir variáveis com seus valores
   return text
       .replace(/\$subscribers/g, twitchStats.subscribers)
-      .replace(/\$viewers/g, twitchStats.viewers);
+      .replace(/\$viewers/g, twitchStats.viewers)
+      .replace(/\$lastSubscriber/g, twitchStats.lastSubscriber || '-');
 }
 
 // Função para atualizar os painéis quando os valores mudarem
