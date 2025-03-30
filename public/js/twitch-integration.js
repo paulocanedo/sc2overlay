@@ -140,6 +140,12 @@ class TwitchIntegration {
             window.twitchStats.subscribers = this.stats.subscribers;
             window.twitchStats.viewers = this.stats.viewers;
             window.twitchStats.lastSubscriber = this.stats.lastSubscriber || '';
+            window.twitchStats.channelTitle = this.stats.channelTitle || '';
+            window.twitchStats.gameName = this.stats.gameName || '';
+            window.twitchStats.followerCount = this.stats.followerCount || 0;
+            window.twitchStats.lastFollower = this.stats.lastFollower || '';
+            window.twitchStats.streamUptime = this.stats.streamUptime || '';
+            window.twitchStats.streamStarted = this.stats.streamStarted || null;
         }
     }
 

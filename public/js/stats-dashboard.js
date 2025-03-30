@@ -5,7 +5,14 @@ const socket = io();
 let panelsConfig = [];
 let twitchStats = {
   subscribers: 0,
-  viewers: 0
+  viewers: 0,
+  lastSubscriber: '',
+  channelTitle: '',
+  gameName: '',
+  followerCount: 0,
+  lastFollower: '',
+  streamUptime: '',
+  streamStarted: null
 };
 
 // Elementos da interface
@@ -163,7 +170,13 @@ function replaceVariables(text) {
   return text
       .replace(/\$subscribers/g, twitchStats.subscribers)
       .replace(/\$viewers/g, twitchStats.viewers)
-      .replace(/\$lastSubscriber/g, twitchStats.lastSubscriber || '-');
+      .replace(/\$lastSubscriber/g, twitchStats.lastSubscriber || 'Nenhum inscrito recente')
+      .replace(/\$channelTitle/g, twitchStats.channelTitle || 'Título não disponível')
+      .replace(/\$gameName/g, twitchStats.gameName || 'Jogo não disponível')
+      .replace(/\$followerCount/g, twitchStats.followerCount)
+      .replace(/\$lastFollower/g, twitchStats.lastFollower || 'Nenhum seguidor recente')
+      .replace(/\$streamUptime/g, twitchStats.streamUptime || 'Offline')
+      .replace(/\$streamStarted/g, twitchStats.streamStarted ? new Date(twitchStats.streamStarted).toLocaleTimeString() : 'Offline');
 }
 
 // Função para atualizar os painéis quando os valores mudarem
@@ -372,6 +385,13 @@ async function loadTwitchStats() {
     if (stats.enabled && stats.authorized) {
       twitchStats.subscribers = stats.subscribers || 0;
       twitchStats.viewers = stats.viewers || 0;
+      twitchStats.lastSubscriber = stats.lastSubscriber || '';
+      twitchStats.channelTitle = stats.channelTitle || '';
+      twitchStats.gameName = stats.gameName || '';
+      twitchStats.followerCount = stats.followerCount || 0;
+      twitchStats.lastFollower = stats.lastFollower || '';
+      twitchStats.streamUptime = stats.streamUptime || '';
+      twitchStats.streamStarted = stats.streamStarted || null;
 
       // Atualizar painéis com novos valores
       updatePanelContents();
@@ -489,6 +509,13 @@ socket.on('twitchStatsUpdated', (data) => {
   console.log('Estatísticas da Twitch atualizadas:', data);
   twitchStats.subscribers = data.subscribers || 0;
   twitchStats.viewers = data.viewers || 0;
+  twitchStats.lastSubscriber = data.lastSubscriber || '';
+  twitchStats.channelTitle = data.channelTitle || '';
+  twitchStats.gameName = data.gameName || '';
+  twitchStats.followerCount = data.followerCount || 0;
+  twitchStats.lastFollower = data.lastFollower || '';
+  twitchStats.streamUptime = data.streamUptime || '';
+  twitchStats.streamStarted = data.streamStarted || null;
 
   // Atualizar painéis com novos valores
   updatePanelContents();
@@ -507,6 +534,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (event.detail) {
       twitchStats.subscribers = event.detail.subscribers || 0;
       twitchStats.viewers = event.detail.viewers || 0;
+      twitchStats.lastSubscriber = event.detail.lastSubscriber || '';
+      twitchStats.channelTitle = event.detail.channelTitle || '';
+      twitchStats.gameName = event.detail.gameName || '';
+      twitchStats.followerCount = event.detail.followerCount || 0;
+      twitchStats.lastFollower = event.detail.lastFollower || '';
+      twitchStats.streamUptime = event.detail.streamUptime || '';
+      twitchStats.streamStarted = event.detail.streamStarted || null;
       updatePanelContents();
     }
   });
