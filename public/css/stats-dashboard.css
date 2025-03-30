@@ -7,12 +7,49 @@
 }
 
 .overlay-panel {
-  background-color: var(--panel-bg);
+  background-color: rgba(var(--panel-bg-r, 20), var(--panel-bg-g, 24), var(--panel-bg-b, 36), var(--panel-bg-opacity));
   border-radius: 10px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   border: 1px solid var(--border-color);
   position: relative;
+}
+
+:root {
+  /* Cores principais */
+  --bg-color: #0a0c14;
+  --panel-bg: #141824;
+  --panel-bg-opacity: 0.95; /* Nova variável para opacidade */
+  --header-bg: #1c2133;
+  --text-color: #e0e0e0;
+  --accent-color: #00a8ff;
+  --victory-color: #4caf50;
+  --defeat-color: #f44336;
+  --border-color: #2a3042;
+
+  /* Cores de raças */
+  --zerg-color: #8b00ff;
+  --terran-color: #1e88e5;
+  --protoss-color: #ffa000;
+  --random-color: #7e7e7e;
+}
+
+/* A função abaixo extrai os componentes RGB do painel para uso com opacidade */
+:root {
+  --panel-bg-r: 20;  /* Valor R de #141824 */
+  --panel-bg-g: 24;  /* Valor G de #141824 */
+  --panel-bg-b: 36;  /* Valor B de #141824 */
+}
+
+/* Garantir que o cabeçalho e rodapé mantenham opacidade completa */
+.panel-header, .panel-footer {
+  background-color: var(--header-bg);
+  opacity: 1;
+}
+
+/* Manter opacidade completa nos elementos de conteúdo */
+.stats-section, .stat-item, .race-stat, .last-game {
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 /* ========== CABEÇALHO E RODAPÉ ========== */

@@ -142,6 +142,12 @@ app.get('/api/config', (req, res) => {
       name: config.player.name
     }
   };
+
+  // Garantir que a opacidade tenha um valor padrão se não estiver definida
+  if (clientConfig.overlay && clientConfig.overlay.bg_opacity === undefined) {
+    clientConfig.overlay.bg_opacity = 0.95; // Valor padrão
+  }
+
   res.json(clientConfig);
 });
 

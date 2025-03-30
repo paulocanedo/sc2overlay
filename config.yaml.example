@@ -24,6 +24,7 @@ overlay:
   theme: "dark"  # Tema do painel (dark ou light)
   auto_save: true  # Salvar estatísticas automaticamente
   save_interval: 300000  # Intervalo para salvar estatísticas (5 minutos)
+  bg_opacity: 0.95  # Opacidade do fundo do painel (0.0 a 1.0, onde 1.0 é completamente opaco)
 
 # Configurações da Twitch
 twitch:
