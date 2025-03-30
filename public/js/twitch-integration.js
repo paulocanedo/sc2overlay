@@ -124,6 +124,22 @@ class TwitchIntegration {
         if (this.elements.viewerCount) {
             this.elements.viewerCount.textContent = this.formatNumber(this.stats.viewers);
         }
+
+        // Emitir evento para atualizar painéis dinâmicos
+        const event = new CustomEvent('twitchStatsUpdated', {
+            detail: {
+                subscribers: this.stats.subscribers,
+                viewers: this.stats.viewers,
+                isLive: this.stats.isLive
+            }
+        });
+        document.dispatchEvent(event);
+
+        // Atualizar os dados globais para painéis dinâmicos
+        if (window.twitchStats) {
+            window.twitchStats.subscribers = this.stats.subscribers;
+            window.twitchStats.viewers = this.stats.viewers;
+        }
     }
 
     updateStatus(message, statusClass) {
