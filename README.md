@@ -62,6 +62,24 @@ Você pode personalizar a aparência dos overlays editando:
 - `public/css/match-bar.css` - Para modificar as cores e estilos do Match Bar
 - Arquivos HTML em `public/` - Para alterar a estrutura dos overlays
 
+### Painéis Personalizados
+
+Você pode adicionar painéis personalizados no overlay de estatísticas usando a seção `overlay.panels` no arquivo `config.yaml`. Os painéis suportam as seguintes variáveis:
+
+#### Variáveis de Inscritos e Visualizações:
+- `$subscribers` - Número de inscritos na Twitch
+- `$viewers` - Número de espectadores atuais
+- `$lastSubscriber` - Nome do último inscrito
+
+#### Variáveis de Seguidores:
+- `$followerCount` - Número total de seguidores
+- `$lastFollower` - Nome do último seguidor
+
+#### Variáveis de Transmissão:
+- `$channelTitle` - Título atual da transmissão
+- `$gameName` - Nome do jogo sendo transmitido
+- `$streamUptime` - Tempo de transmissão atual no formato HH:MM:SS
+- `$streamStarted` - Horário em que a transmissão começou
 
 ## Suporte
 
