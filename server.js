@@ -188,24 +188,24 @@ app.get('/api/matches/recent', async (req, res) => {
 });
 
 // Rota para obter dados da Twitch
-app.get('/api/twitch/stats', async (req, res) => {
-  try {
-    // Em uma implementação real, aqui teríamos código para acessar
-    // a API da Twitch usando as credenciais configuradas
-
-    // Por enquanto, retornamos dados de demonstração
-    const mockData = {
-      subscribers: Math.floor(Math.random() * 1000) + 100,
-      viewers: Math.floor(Math.random() * 500) + 10,
-      isLive: Math.random() > 0.3
-    };
-
-    res.json(mockData);
-  } catch (error) {
-    console.error('Erro ao obter dados da Twitch:', error);
-    res.status(500).json({ error: 'Erro ao obter dados da Twitch' });
-  }
-});
+// app.get('/api/twitch/stats', async (req, res) => {
+//   try {
+//     // Em uma implementação real, aqui teríamos código para acessar
+//     // a API da Twitch usando as credenciais configuradas
+//
+//     // Por enquanto, retornamos dados de demonstração
+//     const mockData = {
+//       subscribers: Math.floor(Math.random() * 1000) + 100,
+//       viewers: Math.floor(Math.random() * 500) + 10,
+//       isLive: Math.random() > 0.3
+//     };
+//
+//     res.json(mockData);
+//   } catch (error) {
+//     console.error('Erro ao obter dados da Twitch:', error);
+//     res.status(500).json({ error: 'Erro ao obter dados da Twitch' });
+//   }
+// });
 
 // Rota para obter configuração da Twitch
 app.get('/api/twitch/config', (req, res) => {

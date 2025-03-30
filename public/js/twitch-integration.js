@@ -139,6 +139,7 @@ class TwitchIntegration {
         if (window.twitchStats) {
             window.twitchStats.subscribers = this.stats.subscribers;
             window.twitchStats.viewers = this.stats.viewers;
+            window.twitchStats.lastSubscriber = this.stats.lastSubscriber || '';
         }
     }
 

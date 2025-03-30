@@ -11,6 +11,7 @@ class TwitchAPI {
             subscribers: 0,
             viewers: 0,
             isLive: false,
+            lastSubscriber: '',
             lastUpdated: 0
         };
         this.updateInterval = config.twitch?.update_interval || 60000; // 1 minuto por padrão
