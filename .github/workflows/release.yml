@@ -38,17 +38,12 @@ jobs:
       
       - name: Extract executable
         run: |
-          cd dist
-          unzip sc2-overlay-win64.zip -d temp
-          cd temp
-          mkdir -p ../exe-only
-          cp sc2-overlay.exe ../exe-only/
-      
+          docker run --rm -v ${{ github.workspace }}/dist:/output sc2-overlay-builder cp /app/sc2-overlay.exe /output/
+
       - name: Create versioned executable
         run: |
           TAG_NAME="${{ steps.tag.outputs.tag_name }}"
-          cd dist/exe-only
-          zip -r ../sc2-overlay-exe-only-$TAG_NAME.zip sc2-overlay.exe
+          cp ${{ github.workspace }}/dist/sc2-overlay.exe ${{ github.workspace }}/dist/sc2-overlay-$TAG_NAME.exe
       
       - name: Create GitHub Release
         id: create_release
@@ -56,7 +51,7 @@ jobs:
         with:
           files: |
             ${{ github.workspace }}/dist/sc2-overlay-${{ steps.tag.outputs.tag_name }}.zip
-            ${{ github.workspace }}/dist/sc2-overlay-exe-only-${{ steps.tag.outputs.tag_name }}.zip
+            ${{ github.workspace }}/dist/sc2-overlay-${{ steps.tag.outputs.tag_name }}.exe
           draft: false
           prerelease: false
           name: Release ${{ steps.tag.outputs.tag_name }}
@@ -66,16 +61,16 @@ jobs:
             ## Arquivos disponíveis:
             
             - **sc2-overlay-${{ steps.tag.outputs.tag_name }}.zip**: Pacote completo com executável e todos os arquivos necessários
-            - **sc2-overlay-exe-only-${{ steps.tag.outputs.tag_name }}.zip**: Apenas o executável, para atualizações rápidas
+            - **sc2-overlay-${{ steps.tag.outputs.tag_name }}.exe**: Apenas o executável, para atualizações rápidas
             
             ## Instruções:
             
             ### Para nova instalação:
-            1. Baixe o pacote completo
+            1. Baixe o pacote completo (.zip)
             2. Extraia em qualquer pasta
             3. Execute o arquivo sc2-overlay.exe
             
             ### Para atualização:
-            1. Baixe apenas o executável
+            1. Baixe apenas o executável (.exe)
             2. Substitua o executável existente
             3. Mantenha seus arquivos de configuração e dados intactos

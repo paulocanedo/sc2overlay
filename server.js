@@ -98,8 +98,8 @@ const io = socketIo(server);
 // Determinar o caminho da pasta public
 function getPublicPath() {
   if (process.pkg) {
-    // Em produção (executável), o diretório public está ao lado do executável
-    return path.join(path.dirname(process.execPath), 'public');
+    // Em produção (executável), o diretório public está embutido no executável
+    return path.join(__dirname, 'public');
   }
   // Em desenvolvimento
   return path.join(process.cwd(), 'public');
@@ -142,6 +142,12 @@ app.get('/api/config', (req, res) => {
       name: config.player.name
     }
   };
+
+  // Garantir que a opacidade tenha um valor padrão se não estiver definida
+  if (clientConfig.overlay && clientConfig.overlay.bg_opacity === undefined) {
+    clientConfig.overlay.bg_opacity = 0.95; // Valor padrão
+  }
+
   res.json(clientConfig);
 });
 

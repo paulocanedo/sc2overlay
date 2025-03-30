@@ -19,7 +19,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build-exe": "docker build -f Dockerfile.pkg -t sc2-overlay-builder . && docker run --rm -v %cd%/dist:/output sc2-overlay-builder cp /app/sc2-overlay-win64.zip /output/"
+    "build-exe": "docker build -f Dockerfile.pkg -t sc2-overlay-builder . && docker run --rm -v %cd%/dist:/output sc2-overlay-builder cp /app/sc2-overlay-win64.zip /output/ && docker run --rm -v %cd%/dist:/output sc2-overlay-builder cp /app/sc2-overlay.exe /output/"
   },
   "author": "",
   "license": "MIT",

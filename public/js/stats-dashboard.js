@@ -332,6 +332,12 @@ async function loadConfig() {
       document.body.classList.add('light-theme');
     }
 
+    // Aplicar opacidade do fundo
+    if (appState.config && appState.config.overlay && appState.config.overlay.bg_opacity !== undefined) {
+      // Definir a variável CSS personalizada para opacidade do fundo
+      document.documentElement.style.setProperty('--panel-bg-opacity', appState.config.overlay.bg_opacity);
+    }
+
     // Carregar configuração de painéis
     if (appState.config && appState.config.overlay && appState.config.overlay.panels) {
       panelsConfig = appState.config.overlay.panels;
