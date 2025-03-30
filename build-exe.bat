@@ -34,11 +34,12 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo.
-echo [INFO] Gerando o arquivo executavel...
+echo [INFO] Gerando o arquivo executavel e o pacote completo...
 docker run --rm -v "%cd%\dist:/output" sc2-overlay-builder cp /app/sc2-overlay-win64.zip /output/
+docker run --rm -v "%cd%\dist:/output" sc2-overlay-builder cp /app/sc2-overlay.exe /output/
 
 if %ERRORLEVEL% neq 0 (
-    echo [ERRO] Falha ao gerar o executavel.
+    echo [ERRO] Falha ao gerar os arquivos.
     pause
     exit /b 1
 )
@@ -46,10 +47,14 @@ if %ERRORLEVEL% neq 0 (
 echo.
 echo [SUCESSO] Processo de build concluido!
 echo O arquivo sc2-overlay-win64.zip foi criado na pasta dist.
+echo O arquivo sc2-overlay.exe foi criado na pasta dist.
 echo.
 echo Instrucoes:
-echo 1. Extraia o arquivo ZIP em qualquer pasta
-echo 2. Execute o arquivo sc2-overlay.exe
+echo 1. Para uma instalacao completa:
+echo    - Extraia o arquivo ZIP em qualquer pasta
+echo    - Execute o arquivo sc2-overlay.exe
+echo 2. Para atualizar uma instalacao existente:
+echo    - Substitua apenas o arquivo sc2-overlay.exe
 echo 3. Certifique-se de que o StarCraft II esteja rodando com a Client API ativada
 echo.
 echo Obrigado por usar o SC2 Stream Overlay!

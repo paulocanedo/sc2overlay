@@ -98,8 +98,8 @@ const io = socketIo(server);
 // Determinar o caminho da pasta public
 function getPublicPath() {
   if (process.pkg) {
-    // Em produção (executável), o diretório public está ao lado do executável
-    return path.join(path.dirname(process.execPath), 'public');
+    // Em produção (executável), o diretório public está embutido no executável
+    return path.join(__dirname, 'public');
   }
   // Em desenvolvimento
   return path.join(process.cwd(), 'public');
