@@ -438,6 +438,110 @@
   display: none !important;
 }
 
+/* Adicione este CSS ao arquivo stats-dashboard.css para garantir o estilo adequado dos painéis dinâmicos */
+
+/* Container principal para painéis dinâmicos */
+#dynamic-panels-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+/* Estilos para painéis com acento lateral */
+.accent-section {
+  margin-bottom: 15px;
+}
+
+/* Oculta o título da seção */
+.accent-section h2 {
+  display: none;
+}
+
+/* Container para conteúdos com acento */
+.accent-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Linha de conteúdo com acento lateral */
+.accent-content-row {
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* Faixa lateral de acento */
+.accent-border {
+  width: 6px;
+  flex-shrink: 0;
+}
+
+/* Variações de cores para a faixa de acento */
+.accent-border-purple {
+  background-color: #9146FF; /* Cor da Twitch */
+}
+
+.accent-border-blue {
+  background-color: var(--accent-color); /* Azul padrão */
+}
+
+.accent-border-green {
+  background-color: var(--victory-color); /* Verde */
+}
+
+.accent-border-red {
+  background-color: var(--defeat-color); /* Vermelho */
+}
+
+/* Conteúdo principal */
+.accent-content {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  padding: 15px;
+}
+
+/* Itens dentro do conteúdo */
+.accent-item {
+  display: flex;
+  align-items: center;
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+/* Ícones em geral */
+.accent-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+/* Variações de cor para ícones */
+.purple-icon {
+  color: #9146FF;
+}
+
+.blue-icon {
+  color: var(--accent-color);
+}
+
+.green-icon {
+  color: var(--victory-color);
+}
+
+.red-icon {
+  color: var(--defeat-color);
+}
+
+/* Tratar quebras de linha em conteúdo de painéis */
+.accent-item span {
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
 /* ========== RESPONSIVIDADE ========== */
 @media (max-width: 400px) {
   .overlay-container {
