@@ -481,13 +481,14 @@
 #dynamic-panels-container {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-top: 15px;
+  gap: 2px; /* Aumentado para criar maior espaçamento vertical */
+  margin-top: 10px; /* Aumentado para maior espaçamento do elemento anterior */
 }
 
 /* Estilos para painéis com acento lateral */
 .accent-section {
-  margin-bottom: 15px;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /* Oculta o título da seção */
@@ -499,7 +500,6 @@
 .accent-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
 /* Linha de conteúdo com acento lateral */
