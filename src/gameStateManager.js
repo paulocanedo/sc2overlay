@@ -141,7 +141,8 @@ class GameStateManager {
                         .filter(player => player.type === 'user')
                         .every(player => !player.result || player.result === 'Undecided');
 
-                    if (allUndecided) {
+                    // Garantir que não é um replay
+                    if (allUndecided && !gameData.isReplay) {
                         this.handleGameStart(gameData, timestamp);
                     }
                 }
