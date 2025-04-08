@@ -41,5 +41,4 @@ twitch:
 
 # Configurações de armazenamento
 storage:
-  stats_file: "./data/stats.json"  # Arquivo para salvar estatísticas
   database_path: "./data/sc2stats.db"  # Arquivo do banco de dados SQLite

@@ -1,10 +1,6 @@
-const fs = require('fs').promises;
-const path = require('path');
-
 class StatsTracker {
   constructor(config) {
     this.config = config;
-    this.statsFile = config.storage.stats_file;
     this.playerName = config.player.name;
     this.exactMatch = config.player.exact_match !== false; // Por padrão, true se não especificado
     this.stats = {
@@ -21,14 +17,6 @@ class StatsTracker {
       },
       lastGame: null
     };
-
-    // Carregar estatísticas salvas
-    this.loadStats();
-
-    // Configurar salvamento automático
-    if (config.overlay.auto_save) {
-      setInterval(() => this.saveStats(), config.overlay.save_interval);
-    }
   }
 
   // Adicionar método para definir estatísticas a partir do banco de dados
@@ -36,40 +24,6 @@ class StatsTracker {
     if (newStats && typeof newStats === 'object') {
       this.stats = newStats;
       console.log('Estatísticas atualizadas externamente');
-      // Salvar as estatísticas no arquivo também
-      this.saveStats();
-    }
-  }
-
-  async loadStats() {
-    try {
-      // Garantir que o diretório existe
-      await fs.mkdir(path.dirname(this.statsFile), { recursive: true });
-
-      // Tentar carregar o arquivo
-      const data = await fs.readFile(this.statsFile, 'utf8');
-      this.stats = JSON.parse(data);
-      console.log('Estatísticas carregadas com sucesso');
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        console.log('Arquivo de estatísticas não existe, usando valores padrão');
-        await this.saveStats();
-      } else {
-        console.error('Erro ao carregar estatísticas:', error);
-      }
-    }
-  }
-
-  async saveStats() {
-    try {
-      // Garantir que o diretório existe
-      await fs.mkdir(path.dirname(this.statsFile), { recursive: true });
-
-      // Salvar o arquivo
-      await fs.writeFile(this.statsFile, JSON.stringify(this.stats, null, 2));
-      console.log('Estatísticas salvas com sucesso');
-    } catch (error) {
-      console.error('Erro ao salvar estatísticas:', error);
     }
   }
 
@@ -166,9 +120,6 @@ class StatsTracker {
       opponent: opponent,
       result: win ? 'Victory' : 'Defeat'
     };
-
-    // Salvar estatísticas
-    this.saveStats();
 
     console.log(`Jogo registrado: ${win ? 'Vitória' : 'Derrota'} contra ${opponent.name} (${opponent.race})`);
   }

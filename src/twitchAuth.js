@@ -10,7 +10,7 @@ class TwitchAuth {
         this.clientSecret = config.twitch?.client_secret || '';
         this.redirectUri = config.twitch?.redirect_uri || 'http://localhost:3000/auth/twitch/callback';
         this.scopes = config.twitch?.scopes || 'channel:read:subscriptions channel:read:stream_key';
-        this.tokensFile = path.join(path.dirname(config.storage.stats_file), 'twitch_tokens.json');
+        this.tokensFile = path.join(config.storage.database_path ? path.dirname(config.storage.database_path) : './data', 'twitch_tokens.json');
         this.tokens = {
             access_token: '',
             refresh_token: '',

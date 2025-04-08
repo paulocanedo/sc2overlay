@@ -51,9 +51,6 @@ function adjustStoragePaths(config) {
 
     // Ajustar caminhos no config
     if (config.storage) {
-        if (config.storage.stats_file) {
-            config.storage.stats_file = path.join(basePath, config.storage.stats_file);
-        }
         if (config.storage.database_path) {
             config.storage.database_path = path.join(basePath, config.storage.database_path);
         }
