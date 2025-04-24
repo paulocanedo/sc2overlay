@@ -55,6 +55,27 @@ body {
   margin: 0 10px;
 }
 
+.player-race .race-icon-img {
+  width: 22px;
+  height: 22px;
+}
+
+.player-race.zerg {
+  box-shadow: 0 0 5px var(--zerg-color);
+}
+
+.player-race.terran {
+  box-shadow: 0 0 5px var(--terran-color);
+}
+
+.player-race.protoss {
+  box-shadow: 0 0 5px var(--protoss-color);
+}
+
+.player-race.random {
+  box-shadow: 0 0 5px var(--random-color);
+}
+
 .player-name {
   font-weight: 700;
   font-size: 16px;
