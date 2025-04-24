@@ -19,5 +19,10 @@ module.exports = function(publicPath) {
         res.sendFile(path.join(publicPath, 'match-bar.html'));
     });
 
+    // Rota para o painel de debug de estado do jogo
+    router.get('/debug/game-state', (req, res) => {
+        res.sendFile(path.join(publicPath, 'game-state-debug.html'));
+    });
+
     return router;
 };
