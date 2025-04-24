@@ -84,6 +84,11 @@ class DB {
         rawData = null
       } = matchData;
 
+      if (result === 'Undecided') {
+        console.warn(`Resultado da partida entre ${playerName} e ${opponentName} está Undecided, ignorando no db`);
+        return false;
+      }
+
       const stmt = this.db.prepare(`
         INSERT INTO matches (
           timestamp, player_name, opponent_name, player_race, opponent_race,
