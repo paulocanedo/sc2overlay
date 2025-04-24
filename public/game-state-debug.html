@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game State Debug - SC2 Stream Overlays</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0a0c14;
+            --panel-bg: #141824;
+            --header-bg: #1c2133;
+            --text-color: #e0e0e0;
+            --accent-color: #00a8ff;
+            --border-color: #2a3042;
+            --log-info: #00a8ff;
+            --log-warn: #ffa000;
+            --log-error: #f44336;
+            --row-alternate: rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: transparent;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 350px;
+            min-height: 600px;
+        }
+
+        .debug-panel {
+            background-color: var(--panel-bg);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .panel-header {
+            background-color: var(--header-bg);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+        }
+
+        .status-indicator .offline i {
+            color: var(--log-error);
+        }
+
+        .status-indicator .online i {
+            color: #4caf50;
+        }
+
+        .log-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .log-entry {
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .log-entry:nth-child(odd) {
+            background-color: var(--row-alternate);
+        }
+
+        .timestamp {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-bottom: 3px;
+        }
+
+        .action {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .data {
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+
+        .action.info {
+            color: var(--log-info);
+        }
+
+        .action.warn {
+            color: var(--log-warn);
+        }
+
+        .action.error {
+            color: var(--log-error);
+        }
+
+        .panel-footer {
+            background-color: var(--header-bg);
+            padding: 10px 20px;
+            border-top: 1px solid var(--border-color);
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn-clear {
+            background-color: var(--log-error);
+        }
+
+        .log-counter {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Scrollbar customization */
+        .log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background-color: var(--accent-color);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="debug-panel">
+        <div class="panel-header">
+            <h1>Game State Debug</h1>
+            <div class="status-indicator">
+                <span id="status-icon" class="offline"><i class="fas fa-circle"></i></span>
+            </div>
+        </div>
+
+        <div class="log-container" id="log-container">
+            <!-- Log entries will be added here dynamically -->
+        </div>
+
+        <div class="panel-footer">
+            <div class="control-buttons">
+                <button class="btn" id="refresh-btn"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                <button class="btn btn-clear" id="clear-btn"><i class="fas fa-trash"></i> Limpar</button>
+            </div>
+            <div class="log-counter">Eventos: <span id="log-count">0</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Connect to Socket.IO
+    const socket = io();
+
+    // DOM elements
+    const logContainer = document.getElementById('log-container');
+    const statusIcon = document.getElementById('status-icon');
+    const logCountElement = document.getElementById('log-count');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const clearBtn = document.getElementById('clear-btn');
+
+    // App state
+    let connected = false;
+    let logEntries = [];
+
+    // Handle socket connection
+    socket.on('connect', () => {
+        connected = true;
+        statusIcon.className = 'online';
+
+        // Load initial state history
+        fetchStateHistory();
+    });
+
+    socket.on('disconnect', () => {
+        connected = false;
+        statusIcon.className = 'offline';
+    });
+
+    // Function to fetch state history from server
+    async function fetchStateHistory() {
+        try {
+            const response = await fetch('/api/debug/state-history');
+            const history = await response.json();
+
+            logEntries = history;
+            renderLogEntries();
+        } catch (error) {
+            console.error('Error fetching state history:', error);
+            addErrorLog('Failed to fetch state history');
+        }
+    }
+
+    // Render log entries to the DOM
+    function renderLogEntries() {
+        logContainer.innerHTML = '';
+
+        if (logEntries.length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'log-entry';
+            emptyMessage.textContent = 'No state history available.';
+            logContainer.appendChild(emptyMessage);
+        } else {
+            logEntries.forEach(entry => {
+                const logEntry = createLogEntry(entry);
+                logContainer.appendChild(logEntry);
+            });
+        }
+
+        // Update log count
+        logCountElement.textContent = logEntries.length;
+
+        // Scroll to bottom
+        logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    // Create a log entry element
+    function createLogEntry(entry) {
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+
+        // Format timestamp to be human-readable with one decimal second precision
+        const timestamp = new Date(entry.timestamp);
+        const formattedTime = timestamp.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            fractionalSecondDigits: 1
+        });
+
+        // Create timestamp element
+        const timestampElement = document.createElement('div');
+        timestampElement.className = 'timestamp';
+        timestampElement.textContent = formattedTime;
+        logEntry.appendChild(timestampElement);
+
+        // Create action element
+        const actionElement = document.createElement('div');
+        actionElement.className = 'action';
+
+        // Determine action type for styling
+        if (entry.action.includes('Error') || entry.action.includes('error')) {
+            actionElement.classList.add('error');
+        } else if (entry.action.includes('Warning') || entry.action.includes('warning')) {
+            actionElement.classList.add('warn');
+        } else {
+            actionElement.classList.add('info');
+        }
+
+        actionElement.textContent = entry.action;
+        logEntry.appendChild(actionElement);
+
+        // Create data element
+        const dataElement = document.createElement('div');
+        dataElement.className = 'data';
+
+        // Format the data nicely
+        let formattedData = '';
+        if (typeof entry.data === 'object') {
+            formattedData = JSON.stringify(entry.data, null, 2);
+        } else {
+            formattedData = String(entry.data);
+        }
+
+        dataElement.textContent = formattedData;
+        logEntry.appendChild(dataElement);
+
+        return logEntry;
+    }
+
+    // Add an error log entry locally
+    function addErrorLog(message) {
+        const errorEntry = {
+            timestamp: new Date().toISOString(),
+            action: 'Error',
+            data: message
+        };
+
+        logEntries.push(errorEntry);
+        renderLogEntries();
+    }
+
+    // Listen for state changed events
+    socket.on('stateChanged', (data) => {
+        const stateEntry = {
+            timestamp: new Date().toISOString(),
+            action: 'State Changed',
+            data: data
+        };
+
+        logEntries.push(stateEntry);
+        renderLogEntries();
+    });
+
+    // Listen for game events
+    const gameEvents = ['gameStarted', 'gameEnded', 'replayStarted', 'replayEnded'];
+    gameEvents.forEach(eventName => {
+        socket.on(eventName, (data) => {
+            const entry = {
+                timestamp: new Date().toISOString(),
+                action: eventName.charAt(0).toUpperCase() + eventName.slice(1),
+                data: data
+            };
+
+            logEntries.push(entry);
+            renderLogEntries();
+        });
+    });
+
+    // Listen for screen events
+    const screenEvents = ['screenEntered', 'screenExited', 'screenChanged'];
+    screenEvents.forEach(eventName => {
+        socket.on(eventName, (data) => {
+            const entry = {
+                timestamp: new Date().toISOString(),
+                action: eventName.charAt(0).toUpperCase() + eventName.slice(1),
+                data: data
+            };
+
+            logEntries.push(entry);
+            renderLogEntries();
+        });
+    });
+
+    // Event listeners for buttons
+    refreshBtn.addEventListener('click', fetchStateHistory);
+
+    clearBtn.addEventListener('click', () => {
+        logEntries = [];
+        renderLogEntries();
+    });
+</script>
+</body>
+</html>

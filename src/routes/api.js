@@ -54,5 +54,15 @@ module.exports = function(config, statsTracker, sc2Monitor, database) {
         res.json(matches);
     }));
 
+    // Rota para obter histórico de estados para debug
+    router.get('/debug/state-history', (req, res) => {
+        if (sc2Monitor && sc2Monitor.getStateHistory) {
+            const history = sc2Monitor.getStateHistory();
+            res.json(history);
+        } else {
+            res.status(404).json({ error: 'Game state history not available' });
+        }
+    });
+
     return router;
 };
