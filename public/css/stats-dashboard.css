@@ -24,6 +24,7 @@
   --text-color: #e0e0e0;
   --accent-color: #00a8ff;
   --victory-color: #4caf50;
+  --neutral-color: #e0e0e0;
   --defeat-color: #f44336;
   --border-color: #2a3042;
 
@@ -85,12 +86,50 @@
 }
 
 .stats-section h2 {
-  font-size: 16px;
-  font-weight: 400;
-  margin-bottom: 15px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid var(--border-color);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  padding: 10px 15px;
+  border-radius: 5px;
+  background-color: var(--header-bg);
   color: var(--accent-color);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Adicionar um acento visual à esquerda */
+.stats-section h2::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--accent-color);
+}
+
+/* Adicionar ícones às seções */
+.stats-section:nth-child(1) h2::after, .stats-section:nth-child(2) h2::after {
+  content: "\f080"; /* ícone de gráfico */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  margin-left: 8px;
+  font-size: 16px;
+  opacity: 0.5;
+}
+
+.stats-section:nth-child(3) h2::after {
+  content: "\f1da"; /* ícone de histórico */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  margin-left: 8px;
+  font-size: 16px;
+  opacity: 0.5;
 }
 
 .total-games-count {
@@ -160,6 +199,10 @@
   background-color: var(--defeat-color);
 }
 
+.stat-color-indicator.neutral {
+  background-color: var(--neutral-color);
+}
+
 /* Linha de estatísticas original (mantido para compatibilidade) */
 .stat-row {
   display: flex;
@@ -205,7 +248,7 @@
 .race-stats {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  /*gap: 10px;*/
 }
 
 .race-stat {
