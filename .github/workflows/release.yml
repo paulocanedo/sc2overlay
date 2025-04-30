@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'  # Disparar para qualquer tag que comece com 'v'
+  workflow_dispatch:
 
 jobs:
   build:
