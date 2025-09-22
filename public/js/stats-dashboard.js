@@ -170,11 +170,11 @@ function replaceVariables(text) {
   return text
       .replace(/\$subscribers/g, twitchStats.subscribers)
       .replace(/\$viewers/g, twitchStats.viewers)
-      .replace(/\$lastSubscriber/g, twitchStats.lastSubscriber || 'Nenhum inscrito recente')
-      .replace(/\$channelTitle/g, twitchStats.channelTitle || 'Título não disponível')
-      .replace(/\$gameName/g, twitchStats.gameName || 'Jogo não disponível')
+      .replace(/\$lastSubscriber/g, twitchStats.lastSubscriber || '-')
+      .replace(/\$channelTitle/g, twitchStats.channelTitle || '-')
+      .replace(/\$gameName/g, twitchStats.gameName || '-')
       .replace(/\$followerCount/g, twitchStats.followerCount)
-      .replace(/\$lastFollower/g, twitchStats.lastFollower || 'Nenhum seguidor recente')
+      .replace(/\$lastFollower/g, twitchStats.lastFollower || '-')
       .replace(/\$streamUptime/g, twitchStats.streamUptime || 'Offline')
       .replace(/\$streamStarted/g, twitchStats.streamStarted ? new Date(twitchStats.streamStarted).toLocaleTimeString() : 'Offline');
 }

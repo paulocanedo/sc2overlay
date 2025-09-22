@@ -47,11 +47,13 @@ const authStates = new Map();
 const pageRoutes = require('./src/routes/pages')(getPublicPath());
 const apiRoutes = require('./src/routes/api')(config, statsTracker, sc2Monitor, database);
 const twitchRoutes = require('./src/routes/twitch')(config, twitchAuth, twitchApi, authStates);
+const configRoutes = require('./src/routes/config')(path.join(getBasePath(), 'config.yaml'), config);
 
 // Montar rotas
 app.use('/', pageRoutes);
 app.use('/api', apiRoutes);
 app.use('/api/twitch', twitchRoutes);
+app.use('/api/config', configRoutes);
 app.use('/auth/twitch', require('./src/routes/twitch-auth')(config, twitchAuth, twitchApi, authStates));
 
 // Configurar eventos do SC2

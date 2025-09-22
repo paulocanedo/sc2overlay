@@ -4,25 +4,6 @@ const { asyncHandler } = require('../middleware/twitch-middleware');
 module.exports = function(config, statsTracker, sc2Monitor, database) {
     const router = express.Router();
 
-    // Rota para obter configuração
-    router.get('/config', (req, res) => {
-        // Enviar apenas configurações seguras (sem secrets)
-        const clientConfig = {
-            overlay: config.overlay,
-            player: {
-                id: config.player.id,
-                name: config.player.name
-            }
-        };
-
-        // Garantir que a opacidade tenha um valor padrão se não estiver definida
-        if (clientConfig.overlay && clientConfig.overlay.bg_opacity === undefined) {
-            clientConfig.overlay.bg_opacity = 0.95; // Valor padrão
-        }
-
-        res.json(clientConfig);
-    });
-
     // Rota para obter estatísticas
     router.get('/stats', (req, res) => {
         res.json(statsTracker.getStats());

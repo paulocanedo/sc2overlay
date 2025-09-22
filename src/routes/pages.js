@@ -24,5 +24,10 @@ module.exports = function(publicPath) {
         res.sendFile(path.join(publicPath, 'game-state-debug.html'));
     });
 
+    // Rota para o editor de configuração
+    router.get('/config', (req, res) => {
+        res.sendFile(path.join(publicPath, 'config-editor.html'));
+    });
+
     return router;
 };

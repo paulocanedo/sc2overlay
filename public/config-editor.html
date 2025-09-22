@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Configuração - SC2 Stream Overlays</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/config-editor.css">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-cog"></i> Editor de Configuração</h1>
+        <a href="/" class="back-button">
+            <i class="fas fa-arrow-left"></i> Voltar ao Início
+        </a>
+    </div>
+
+    <div class="alerts-container" id="alerts-container"></div>
+
+    <div class="config-editor">
+        <!-- Informações sobre o Jogador -->
+        <div class="config-section">
+            <div class="section-header">
+                <h2><i class="fas fa-user"></i> Informações do Jogador</h2>
+            </div>
+            <div class="section-content">
+                <div class="config-item">
+                    <label for="player-name">
+                        Nome do Jogador
+                        <span class="tooltip" data-tooltip="Seu nome de jogador no StarCraft II">
+                <i class="fas fa-question-circle"></i>
+              </span>
+                    </label>
+                    <input type="text" id="player-name" name="player.name" class="config-input" />
+                </div>
+
+                <div class="config-item">
+                    <label for="player-exact-match">
+                        <input type="checkbox" id="player-exact-match" name="player.exact_match" />
+                        Correspondência Exata
+                        <span class="tooltip" data-tooltip="Se desmarcado, fará correspondência parcial/case-insensitive">
+                <i class="fas fa-question-circle"></i>
+              </span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configurações do Cliente SC2 -->
+        <div class="config-section">
+            <div class="section-header">
+                <h2><i class="fas fa-gamepad"></i> Cliente SC2</h2>
+                <span class="restart-required" title="Mudanças nesta seção requerem reinicialização">
+            <i class="fas fa-exclamation-triangle"></i> Requer reinicialização
+          </span>
+            </div>
+            <div class="section-content">
+                <div class="config-item">
+                    <label for="sc2-api-url">
+                        URL da API
+                        <span class="tooltip" data-tooltip="URL padrão da API do cliente SC2">
+                <i class="fas fa-question-circle"></i>
+              </span>
+                    </label>
+                    <input type="text" id="sc2-api-url" name="sc2_client.api_url" class="config-input requires-restart" />
+                    <small>Use http://host.docker.internal:6119 se estiver rodando em Docker</small>
+                </div>
+
+                <div class="config-item">
+                    <label for="sc2-poll-interval">
+                        Intervalo de Polling (ms)
+                        <span class="tooltip" data-tooltip="Intervalo de verificação de status em milissegundos">
+                <i class="fas fa-question-circle"></i>
+              </span>
+                    </label>
+                    <input type="number" id="sc2-poll-interval" name="sc2_client.poll_interval" class="config-input requires-restart" min="500" max="10000" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Configurações do Servidor -->
+        <div class="config-section">
+            <div class="section-header">
+                <h2><i class="fas fa-server"></i> Servidor Web</h2>
+                <span class="restart-required" title="Mudanças nesta seção requerem reinicialização">
+            <i class="fas fa-exclamation-triangle"></i> Requer reinicialização
+          </span>
+            </div>
+            <div class="section-content">
+                <div class="config-item">
+                    <label for="server-port">
+                        Porta
+                        <span class="tooltip" data-tooltip="Porta do servidor web">
+                <i class="fas fa-question-circle"></i>
+              </span>
+                    </label>
+                    <input type="number" id="server-port" name="server.port" class="config-input requires-restart" min="1" max="65535" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Configurações do Overlay -->
+        <div class="config-section">
+            <div class="section-header">
+                <h2><i class="fas fa-tv"></i> Overlay</h2>
+            </div>
+            <div class="section-content">
+                <div class="config-item">
+                    <label for="overlay-title">
+                        Título do Painel
+                        <span class="tooltip" data-tooltip="Título exibido no painel de estatísticas">
+                <i class="fas fa-question-circle"></i>
+              </span>
+                    </label>
+                    <input type="text" id="overlay-title" name="overlay.title" class="config-input" />
+                </div>
+
+                <div class="config-item">
+                    <label for="overlay-theme">
+                        Tema
+                        <span class="tooltip" data-tooltip="Tema visual do painel">
+                <i class="fas fa-question-circle"></i>
+              </span>
+                    </label>
+                    <select id="overlay-theme" name="overlay.theme" class="config-input">
+                        <option value="dark">Escuro</option>
+                        <option value="light">Claro</option>
+                    </select>
+                </div>
+
+                <div class="config-item">
+                    <label for="overlay-bg-opacity">
+                        Opacidade do Fundo
+                        <span class="tooltip" data-tooltip="Transparência do fundo (0.0 = transparente, 1.0 = opaco)">
+                <i class="fas fa-question-circle"></i>
+              </span>
+                    </label>
+                    <div class="opacity-control">
+                        <input type="range" id="overlay-bg-opacity" name="overlay.bg_opacity" class="config-input opacity-slider" min="0" max="1" step="0.05" />
+                        <span class="opacity-value" id="opacity-value">0.95</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configurações da Twitch -->
+        <div class="config-section">
+            <div class="section-header">
+                <h2><i class="fab fa-twitch"></i> Integração Twitch</h2>
+                <span class="restart-required" title="Mudanças nesta seção requerem reinicialização">
+            <i class="fas fa-exclamation-triangle"></i> Requer reinicialização
+          </span>
+            </div>
+            <div class="section-content">
+                <div class="config-item">
+                    <label for="twitch-enabled">
+                        <input type="checkbox" id="twitch-enabled" name="twitch.enabled" class="requires-restart" />
+                        Ativar Integração
+                        <span class="tooltip" data-tooltip="Habilita a integração com a Twitch">
+                <i class="fas fa-question-circle"></i>
+              </span>
+                    </label>
+                </div>
+
+                <div class="twitch-settings" id="twitch-settings">
+                    <div class="config-item">
+                        <label for="twitch-channel">
+                            Nome do Canal
+                            <span class="tooltip" data-tooltip="Nome do seu canal na Twitch">
+                  <i class="fas fa-question-circle"></i>
+                </span>
+                        </label>
+                        <input type="text" id="twitch-channel" name="twitch.channel_name" class="config-input requires-restart" />
+                    </div>
+
+                    <div class="config-item">
+                        <label for="twitch-client-id">
+                            Client ID
+                            <span class="tooltip" data-tooltip="Client ID da sua aplicação Twitch">
+                  <i class="fas fa-question-circle"></i>
+                </span>
+                        </label>
+                        <input type="text" id="twitch-client-id" name="twitch.client_id" class="config-input requires-restart" />
+                    </div>
+
+                    <div class="config-item">
+                        <label for="twitch-client-secret">
+                            Client Secret
+                            <span class="tooltip" data-tooltip="Client Secret da sua aplicação Twitch">
+                  <i class="fas fa-question-circle"></i>
+                </span>
+                        </label>
+                        <input type="password" id="twitch-client-secret" name="twitch.client_secret" class="config-input requires-restart" />
+                        <button type="button" class="toggle-password" data-target="twitch-client-secret">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+
+                    <div class="config-item">
+                        <label for="twitch-update-interval">
+                            Intervalo de Atualização (ms)
+                            <span class="tooltip" data-tooltip="Intervalo para atualizar estatísticas da Twitch">
+                  <i class="fas fa-question-circle"></i>
+                </span>
+                        </label>
+                        <input type="number" id="twitch-update-interval" name="twitch.update_interval" class="config-input" min="30000" max="300000" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painéis Personalizados -->
+        <div class="config-section">
+            <div class="section-header">
+                <h2><i class="fas fa-th"></i> Painéis Personalizados</h2>
+                <button type="button" class="add-panel-btn" id="add-panel-btn">
+                    <i class="fas fa-plus"></i> Adicionar Painel
+                </button>
+            </div>
+            <div class="section-content">
+                <div id="panels-container" class="panels-container">
+                    <!-- Painéis serão adicionados dinamicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Configurações de Armazenamento -->
+        <div class="config-section">
+            <div class="section-header">
+                <h2><i class="fas fa-database"></i> Armazenamento</h2>
+                <span class="restart-required" title="Mudanças nesta seção requerem reinicialização">
+            <i class="fas fa-exclamation-triangle"></i> Requer reinicialização
+          </span>
+            </div>
+            <div class="section-content">
+                <div class="config-item">
+                    <label for="storage-db-path">
+                        Caminho do Banco de Dados
+                        <span class="tooltip" data-tooltip="Caminho para o arquivo SQLite">
+                <i class="fas fa-question-circle"></i>
+              </span>
+                    </label>
+                    <input type="text" id="storage-db-path" name="storage.database_path" class="config-input requires-restart" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="action-buttons">
+            <button type="button" class="btn btn-save" id="save-config">
+                <i class="fas fa-save"></i> Salvar Configuração
+            </button>
+            <button type="button" class="btn btn-reset" id="reset-config">
+                <i class="fas fa-undo"></i> Resetar Alterações
+            </button>
+            <button type="button" class="btn btn-download" id="download-config">
+                <i class="fas fa-download"></i> Baixar config.yaml
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/config-editor.js"></script>
+</body>
+</html>

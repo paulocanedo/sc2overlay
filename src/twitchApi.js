@@ -235,9 +235,9 @@ class TwitchAPI {
                 };
             } else {
                 return {
-                    id: '',
-                    name: '',
-                    tier: '',
+                    id: '-1',
+                    name: 'nenhum',
+                    tier: '-1',
                     timestamp: 0
                 };
             }
