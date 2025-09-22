@@ -14,7 +14,8 @@ module.exports = function(configPath, config) {
             player: {
                 id: config.player.id,
                 name: config.player.name
-            }
+            },
+            stats: config.stats
         };
 
         // Garantir que a opacidade tenha um valor padrão se não estiver definida

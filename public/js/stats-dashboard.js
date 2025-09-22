@@ -312,13 +312,57 @@ function updateStats(stats) {
   updateLastGameInfo(stats.lastGame);
 }
 
-// Carregar partidas recentes
+// Carregar estatísticas iniciais com filtro de tempo
+async function loadStats() {
+  try {
+    // Buscar configuração de filtro de tempo
+    const config = await getConfig();
+    const timeFilter = createTimeFilterFromConfig(config);
+    
+    let url = '/api/stats';
+    
+    // Adicionar parâmetros de filtro se habilitado
+    if (timeFilter) {
+      const params = new URLSearchParams();
+      if (timeFilter.startDate) params.append('startDate', timeFilter.startDate);
+      if (timeFilter.endDate) params.append('endDate', timeFilter.endDate);
+      
+      if (params.toString()) {
+        url += '?' + params.toString();
+      }
+    }
+    
+    const response = await fetch(url);
+    const stats = await response.json();
+    updateStats(stats);
+    console.log('Estatísticas iniciais carregadas com sucesso', timeFilter ? 'com filtro' : 'sem filtro');
+  } catch (error) {
+    console.error('Erro ao carregar estatísticas:', error);
+  }
+}
+
+// Carregar partidas recentes com filtro de tempo
 async function loadRecentMatches() {
   try {
-    const response = await fetch('/api/matches/recent?limit=10');
+    // Buscar configuração de filtro de tempo
+    const config = await getConfig();
+    const timeFilter = createTimeFilterFromConfig(config);
+    
+    let url = '/api/matches/recent?limit=10';
+    
+    // Adicionar parâmetros de filtro se habilitado
+    if (timeFilter) {
+      const params = new URLSearchParams('limit=10');
+      if (timeFilter.startDate) params.append('startDate', timeFilter.startDate);
+      if (timeFilter.endDate) params.append('endDate', timeFilter.endDate);
+      
+      url = '/api/matches/recent?' + params.toString();
+    }
+
+    const response = await fetch(url);
     const matches = await response.json();
 
-    console.log('Partidas recentes carregadas:', matches);
+    console.log('Partidas recentes carregadas:', matches, timeFilter ? 'com filtro' : 'sem filtro');
 
     // Armazenar no estado da aplicação
     appState.recentMatches = matches;
@@ -328,6 +372,94 @@ async function loadRecentMatches() {
   } catch (error) {
     console.error('Erro ao carregar partidas recentes:', error);
   }
+}
+
+// Função para buscar configuração (cache para otimizar)
+let configCache = null;
+let configCacheTime = 0;
+const CONFIG_CACHE_DURATION = 30000; // 30 segundos
+
+async function getConfig() {
+  const now = Date.now();
+  
+  // Usar cache se ainda válido
+  if (configCache && (now - configCacheTime) < CONFIG_CACHE_DURATION) {
+    return configCache;
+  }
+  
+  try {
+    const response = await fetch('/api/config');
+    configCache = await response.json();
+    configCacheTime = now;
+    return configCache;
+  } catch (error) {
+    console.error('Erro ao carregar configuração:', error);
+    return appState.config; // fallback para configuração já carregada
+  }
+}
+
+// Função para criar filtro de tempo baseado na configuração
+function createTimeFilterFromConfig(config) {
+  if (!config ||
+      !config.stats ||
+      !config.stats.time_filter ||
+      !config.stats.time_filter.enabled) {
+    return null;
+  }
+
+  const filter = config.stats.time_filter;
+  const now = new Date();
+
+  switch (filter.type) {
+    case 'last_days':
+      if (filter.value && filter.value > 0) {
+        const startDate = new Date(now);
+        startDate.setDate(startDate.getDate() - filter.value);
+        return {
+          startDate: startDate.toISOString(),
+          endDate: now.toISOString()
+        };
+      }
+      break;
+
+    case 'last_hours':
+      if (filter.value && filter.value > 0) {
+        const startDate = new Date(now);
+        startDate.setHours(startDate.getHours() - filter.value);
+        return {
+          startDate: startDate.toISOString(),
+          endDate: now.toISOString()
+        };
+      }
+      break;
+
+    case 'custom_period':
+      if (filter.start_date && filter.end_date) {
+        return {
+          startDate: new Date(filter.start_date).toISOString(),
+          endDate: new Date(filter.end_date).toISOString()
+        };
+      }
+      break;
+
+    case 'session_only':
+      // Para sessão atual, usar a hora que a aplicação foi iniciada
+      // Como não temos essa informação, vamos usar as últimas 8 horas como aproximação
+      const sessionStart = new Date(now);
+      sessionStart.setHours(sessionStart.getHours() - 8);
+      return {
+        startDate: sessionStart.toISOString(),
+        endDate: now.toISOString()
+      };
+  }
+
+  return null;
+}
+
+// Função para atualizar estatísticas com nova configuração
+async function refreshStatsWithCurrentFilter() {
+  await loadStats();
+  await loadRecentMatches();
 }
 
 // Carregar configuração
@@ -358,21 +490,13 @@ async function loadConfig() {
       createDynamicPanels();
     }
 
+    // Atualizar cache de configuração
+    configCache = appState.config;
+    configCacheTime = Date.now();
+
     console.log('Configuração carregada:', appState.config);
   } catch (error) {
     console.error('Erro ao carregar configuração:', error);
-  }
-}
-
-// Carregar estatísticas iniciais
-async function loadStats() {
-  try {
-    const response = await fetch('/api/stats');
-    const stats = await response.json();
-    updateStats(stats);
-    console.log('Estatísticas iniciais carregadas com sucesso');
-  } catch (error) {
-    console.error('Erro ao carregar estatísticas:', error);
   }
 }
 
@@ -407,11 +531,12 @@ socket.on('connect', () => {
   appState.connected = true;
   updateStatus('online', 'Conectado');
 
-  // Carregar configuração e estatísticas iniciais
-  loadConfig();
-  loadStats();
-  loadRecentMatches();
-  loadTwitchStats();
+  // Carregar configuração e estatísticas iniciais (agora com filtro)
+  loadConfig().then(() => {
+    loadStats();
+    loadRecentMatches();
+    loadTwitchStats();
+  });
 });
 
 socket.on('disconnect', () => {
@@ -501,7 +626,7 @@ socket.on('statsUpdated', (stats) => {
   console.log('Estatísticas atualizadas:', stats);
   updateStats(stats);
 
-  // Recarregar partidas recentes quando estatísticas forem atualizadas
+  // Recarregar partidas recentes quando estatísticas forem atualizadas (com filtro)
   loadRecentMatches();
 });
 
@@ -519,6 +644,19 @@ socket.on('twitchStatsUpdated', (data) => {
 
   // Atualizar painéis com novos valores
   updatePanelContents();
+});
+
+// Adicionar função para recarregar estatísticas quando a configuração mudar
+socket.on('configUpdated', () => {
+  console.log('Configuração atualizada, recarregando estatísticas com novo filtro');
+  // Limpar cache de configuração
+  configCache = null;
+  configCacheTime = 0;
+  
+  // Recarregar configuração e estatísticas
+  loadConfig().then(() => {
+    refreshStatsWithCurrentFilter();
+  });
 });
 
 // Inicialização

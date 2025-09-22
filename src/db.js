@@ -116,15 +116,41 @@ class DB {
     }
   }
 
-  async getMatchStats() {
+  async getMatchStats(timeFilter = null) {
     if (!this.connected || !this.db) {
       console.error('Banco de dados não está conectado');
       return null;
     }
 
     try {
-      // CORREÇÃO: Log para depuração
-      console.log('Consultando estatísticas do banco de dados...');
+      // Log para depuração
+      if (timeFilter) {
+        console.log('Consultando estatísticas do banco de dados com filtro:', timeFilter);
+      } else {
+        console.log('Consultando estatísticas do banco de dados sem filtro');
+      }
+      
+      // Preparar condição WHERE para filtro de tempo
+      let timeCondition = '';
+      let timeParams = [];
+      
+      if (timeFilter) {
+        const { startDate, endDate } = timeFilter;
+        
+        if (startDate && endDate) {
+          timeCondition = 'WHERE timestamp BETWEEN ? AND ?';
+          timeParams = [startDate, endDate];
+          console.log(`Aplicando filtro de tempo: ${startDate} até ${endDate}`);
+        } else if (startDate) {
+          timeCondition = 'WHERE timestamp >= ?';
+          timeParams = [startDate];
+          console.log(`Aplicando filtro de tempo desde: ${startDate}`);
+        } else if (endDate) {
+          timeCondition = 'WHERE timestamp <= ?';
+          timeParams = [endDate];
+          console.log(`Aplicando filtro de tempo até: ${endDate}`);
+        }
+      }
 
       // Estatísticas gerais - consulta com detalhes
       const totalStatsStmt = this.db.prepare(`
@@ -133,10 +159,26 @@ class DB {
           SUM(CASE WHEN result = 'Victory' THEN 1 ELSE 0 END) AS total_wins,
           SUM(CASE WHEN result = 'Defeat' THEN 1 ELSE 0 END) AS total_losses
         FROM matches
+        ${timeCondition}
       `);
 
-      const totalStats = totalStatsStmt.get();
+      const totalStats = totalStatsStmt.get(...timeParams);
       console.log(`Totais calculados: jogos=${totalStats.total_games}, vitórias=${totalStats.total_wins}, derrotas=${totalStats.total_losses}`);
+
+      // Se não há jogos, retornar estrutura vazia mas válida
+      if (totalStats.total_games === 0) {
+        console.log('Nenhum jogo encontrado no período especificado');
+        return {
+          total: { games: 0, wins: 0, losses: 0 },
+          byRace: {
+            Zerg: { games: 0, wins: 0, losses: 0 },
+            Terr: { games: 0, wins: 0, losses: 0 },
+            Prot: { games: 0, wins: 0, losses: 0 },
+            random: { games: 0, wins: 0, losses: 0 }
+          },
+          lastGame: null
+        };
+      }
 
       // Estatísticas por raça
       const raceStatsStmt = this.db.prepare(`
@@ -146,23 +188,25 @@ class DB {
           SUM(CASE WHEN result = 'Victory' THEN 1 ELSE 0 END) AS wins,
           SUM(CASE WHEN result = 'Defeat' THEN 1 ELSE 0 END) AS losses
         FROM matches
+        ${timeCondition}
         GROUP BY opponent_race
       `);
 
-      const raceStats = raceStatsStmt.all();
-      console.log('Estatísticas por raça:');
+      const raceStats = raceStatsStmt.all(...timeParams);
+      console.log('Estatísticas por raça encontradas:', raceStats.length, 'registros');
       raceStats.forEach(r => {
         console.log(`- ${r.opponent_race}: jogos=${r.games}, vitórias=${r.wins}, derrotas=${r.losses}`);
       });
 
-      // Último jogo
+      // Último jogo (dentro do filtro de tempo, se aplicável)
       const lastMatchStmt = this.db.prepare(`
         SELECT * FROM matches
+        ${timeCondition}
         ORDER BY timestamp DESC
         LIMIT 1
       `);
 
-      const lastMatch = lastMatchStmt.get();
+      const lastMatch = lastMatchStmt.get(...timeParams);
 
       // Formatar as estatísticas para corresponder ao formato esperado
       const racesMap = {
@@ -208,7 +252,15 @@ class DB {
           },
           result: lastMatch.result
         };
+        console.log('Último jogo encontrado:', lastMatch.timestamp);
+      } else {
+        console.log('Nenhum último jogo encontrado no período');
       }
+
+      console.log('Estatísticas finais:', {
+        totalGames: stats.total.games,
+        filtroAplicado: timeFilter ? 'Sim' : 'Não'
+      });
 
       return stats;
     } catch (error) {
@@ -249,6 +301,76 @@ class DB {
       }
     }
   }
+}
+
+// Função para criar filtro de tempo baseado na configuração
+function createTimeFilterFromConfig(config) {
+  if (!config || 
+      !config.stats || 
+      !config.stats.time_filter || 
+      !config.stats.time_filter.enabled) {
+    console.log('Filtro de tempo desabilitado ou não configurado');
+    return null;
+  }
+  
+  const filter = config.stats.time_filter;
+  const now = new Date();
+  
+  console.log('Configuração de filtro encontrada:', filter);
+  
+  switch (filter.type) {
+    case 'last_days':
+      if (filter.value && filter.value > 0) {
+        const startDate = new Date(now);
+        startDate.setDate(startDate.getDate() - filter.value);
+        const result = {
+          startDate: startDate.toISOString(),
+          endDate: now.toISOString()
+        };
+        console.log(`Filtro criado - Últimos ${filter.value} dias:`, result);
+        return result;
+      }
+      break;
+      
+    case 'last_hours':
+      if (filter.value && filter.value > 0) {
+        const startDate = new Date(now);
+        startDate.setHours(startDate.getHours() - filter.value);
+        const result = {
+          startDate: startDate.toISOString(),
+          endDate: now.toISOString()
+        };
+        console.log(`Filtro criado - Últimas ${filter.value} horas:`, result);
+        return result;
+      }
+      break;
+      
+    case 'custom_period':
+      if (filter.start_date && filter.end_date) {
+        const result = {
+          startDate: new Date(filter.start_date).toISOString(),
+          endDate: new Date(filter.end_date).toISOString()
+        };
+        console.log('Filtro criado - Período customizado:', result);
+        return result;
+      }
+      break;
+      
+    case 'session_only':
+      // Para sessão atual, usar a hora que a aplicação foi iniciada
+      // Como não temos essa informação, vamos usar as últimas 8 horas como aproximação
+      const sessionStart = new Date(now);
+      sessionStart.setHours(sessionStart.getHours() - 8);
+      const result = {
+        startDate: sessionStart.toISOString(),
+        endDate: now.toISOString()
+      };
+      console.log('Filtro criado - Sessão atual (últimas 8 horas):', result);
+      return result;
+  }
+  
+  console.log('Nenhum filtro válido pôde ser criado');
+  return null;
 }
 
 module.exports = DB;
