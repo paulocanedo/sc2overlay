@@ -1,5 +1,6 @@
 const axios = require('axios');
 const EventEmitter = require('./eventEmitter');
+const TwitchEventSubManager = require('./twitchEventSubManager');
 
 class TwitchAPI {
     constructor(authManager, config) {
@@ -23,10 +24,48 @@ class TwitchAPI {
         this.updateInterval = config.twitch?.update_interval || 60000; // 1 minuto por padrão
         this.channelName = config.twitch?.channel_name || '';
         this.broadcasterId = null;
+        this.eventSubInitialized = false;
+
+        // Inicializar EventSub manager (mas não conectar ainda)
+        this.eventSubManager = new TwitchEventSubManager(authManager, config);
+        
+        // Escutar eventos de novos inscritos
+        this.eventSubManager.on('newSubscriber', (subscriberData) => {
+            this.statsCache.lastSubscriber = subscriberData.name;
+            this.events.emit('statsUpdated', this.statsCache);
+        });
 
         // Iniciar a atualização periódica se estiver configurado
         if (config.twitch?.enabled && this.channelName) {
             this.startPeriodicUpdates();
+            // NÃO inicializar o EventSub aqui - apenas aguardar autorização
+        }
+    }
+
+    async initializeEventSubIfAuthorized() {
+        // Só tentar inicializar EventSub se estivermos autorizados e ainda não foi inicializado
+        if (this.auth.isAuthorized() && !this.eventSubInitialized) {
+            try {
+                await this.eventSubManager.initialize();
+                this.eventSubInitialized = true;
+                console.log('EventSub inicializado com sucesso após autorização');
+            } catch (error) {
+                console.error('Erro ao inicializar EventSub:', error);
+            }
+        }
+    }
+
+    async initializeEventSub() {
+        try {
+            // Só tentar inicializar se estivermos autorizados
+            if (this.auth.isAuthorized()) {
+                await this.eventSubManager.initialize();
+                console.log('EventSub inicializado com sucesso');
+            } else {
+                console.log('EventSub não inicializado - aguardando autorização');
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar EventSub:', error);
         }
     }
 
@@ -50,6 +89,9 @@ class TwitchAPI {
             return this.statsCache;
         }
 
+        // Tentar inicializar EventSub se ainda não foi inicializado
+        await this.initializeEventSubIfAuthorized();
+
         try {
             // Obter ID do broadcaster se ainda não tivermos
             if (!this.broadcasterId) {
@@ -67,14 +109,11 @@ class TwitchAPI {
                 console.error('Erro ao obter informações do canal, usando valores padrão:', error.message);
             }
 
-            // Obter contagem de inscritos e último inscrito
+            // Obter contagem de inscritos
             const subsCount = await this.getSubscriberCount();
-            let lastSub = { name: '' };
-            try {
-                lastSub = await this.getLastSubscriber();
-            } catch (error) {
-                console.error('Erro ao obter último inscrito, usando valor padrão:', error.message);
-            }
+            
+            // Obter último inscrito do EventSub manager
+            const lastSub = this.eventSubManager.getLastSubscriber();
 
             // Obter contagem e último seguidor
             let followerInfo = { count: 0, latestFollower: '' };
@@ -438,6 +477,19 @@ class TwitchAPI {
 
     on(event, callback) {
         return this.events.on(event, callback);
+    }
+
+    async disconnect() {
+        if (this.eventSubManager) {
+            this.eventSubManager.disconnect();
+        }
+    }
+
+    // Método público para forçar inicialização do EventSub após autorização
+    async forceEventSubInitialization() {
+        if (this.auth.isAuthorized() && !this.eventSubInitialized) {
+            await this.initializeEventSubIfAuthorized();
+        }
     }
 }
 
