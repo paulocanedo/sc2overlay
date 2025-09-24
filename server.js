@@ -71,10 +71,12 @@ database.initialize().then(success => {
     console.log('Banco de dados inicializado com sucesso');
 
     // Carregar estatísticas do banco para o rastreador, se disponíveis
+    // Nota: Aqui carregamos sem filtro para manter o comportamento inicial padrão
+    // O filtro será aplicado dinamicamente via API conforme a configuração do usuário
     database.getMatchStats().then(dbStats => {
       if (dbStats) {
         statsTracker.setStats(dbStats);
-        console.log('Estatísticas carregadas do banco de dados');
+        console.log('Estatísticas carregadas do banco de dados (todas as partidas)');
       }
     }).catch(err => {
       console.error('Erro ao carregar estatísticas do banco:', err);
