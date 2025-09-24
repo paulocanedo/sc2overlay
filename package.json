@@ -1,6 +1,6 @@
 {
   "name": "sc2-stream-overlay",
-  "version": "v0.3.4",
+  "version": "0.4.0",
   "description": "Overlay de estatísticas de StarCraft II para streams",
   "main": "server.js",
   "bin": "server.js",
